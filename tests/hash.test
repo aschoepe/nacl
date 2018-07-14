@@ -1,0 +1,45 @@
+#
+# Commands covered: nacl::hash
+#
+
+#
+# (c) 2016 Alexander Schoepe
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+  package require tcltest 2
+  namespace import -force ::tcltest::*
+}
+
+package require nacl
+
+if {[lsearch -exact [nacl::randombytes names] urandom] > -1} {
+  nacl::randombytes source urandom
+}
+
+test hash-1.1 {hash takes args} -body {
+  nacl::hash
+} -returnCodes error -result "wrong # args: should be \"nacl::hash ?-option|command? ...\""
+
+test hash-1.2 {hash info} {
+  list [catch {nacl::hash info} l] $l
+} {0 {sha256 32 sha512 64}}
+
+test hash-1.3 {hash sha256} {
+  list [nacl::hash -sha256 hash "testing\n"] [binary encode hex $hash]
+} {0 12a61f4e173fb3a11c05d6471f74728f76231b4a5fcd9667cef3af87a3ae4dc2}
+
+test hash-1.4 {hash sha512} {
+  list [nacl::hash -sha512 hash "testing\n"] [binary encode hex $hash]
+} {0 24f950aac7b9ea9b3cb728228a0c82b67c39e96b4b344798870d5daee93e3ae5931baae8c7cacfea4b629452c38026a81d138bc7aad1af3ef7bfd5ec646d6c28}
+
+test hash-1.5 {hash sha256} {
+  list [nacl::hash -sha256 hash {Tcl does SHA256}] [binary encode hex $hash]
+} {0 0b91043ee484abd83c3e4b08d6034d71b937026379f0f59bda6e625e6e214789}
+
+# cleanup
+::tcltest::cleanupTests
+return

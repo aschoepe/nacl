@@ -1,0 +1,37 @@
+#
+# Commands covered: nacl::randombytes
+#
+
+#
+# (c) 2016 Alexander Schoepe
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+  package require tcltest 2
+  namespace import -force ::tcltest::*
+}
+
+package require nacl
+
+if {[lsearch -exact [nacl::randombytes names] urandom] > -1} {
+  nacl::randombytes source urandom
+}
+
+test randombytes-1.1 {randombytes takes args} -body {
+  nacl::randombytes
+} -returnCodes error -result "wrong # args: should be \"nacl::randombytes ?command|lengthValue? ...\""
+
+test randombytes-1.2 {randombytes names} {
+  catch {nacl::randombytes names}
+} 0
+
+test randombytes-1.3 {randombytes length} {
+  string length [nacl::randombytes 32]
+} 32
+
+# cleanup
+::tcltest::cleanupTests
+return

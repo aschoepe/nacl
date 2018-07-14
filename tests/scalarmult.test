@@ -1,0 +1,55 @@
+#
+# Commands covered: nacl::scalarmult
+#
+
+#
+# (c) 2016 Alexander Schoepe
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+  package require tcltest 2
+  namespace import -force ::tcltest::*
+}
+
+package require nacl
+
+if {[lsearch -exact [nacl::randombytes names] urandom] > -1} {
+  nacl::randombytes source urandom
+}
+
+set sec1 [binary decode hex 77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a]
+set pub1 [binary decode hex 8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a]
+set sec2 [binary decode hex 5dab087e624a8a4b79e17f8b83800ee66f3bb1292618b6fd1c2f8b27ff88e0eb]
+set pub2 [binary decode hex de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f]
+set msp [binary decode hex 4a5d9d5ba4ce2de1728e3bf480350f25e07e21c947d19e3376f09b3c1e161742]
+
+test scalarmult-1.1 {scalarmult takes args} -body {
+  nacl::scalarmult
+} -returnCodes error -result "wrong # args: should be \"nacl::scalarmult ?command? ...\""
+
+test scalarmult-1.2 {scalarmult info} {
+  list [catch {nacl::scalarmult info} l] $l
+} {0 {result 32 scalar 32 group 32}}
+
+test scalarmult-1.3 {scalarmult sec1} {
+  list [nacl::scalarmult base result $sec1] $result
+} [list 0 $pub1]
+
+test scalarmult-1.4 {scalarmult sec2} {
+  list [nacl::scalarmult base result $sec2] $result
+} [list 0 $pub2]
+
+test scalarmult-1.5 {scalarmult sec1 pub2} {
+  list [nacl::scalarmult result $sec1 $pub2] $result
+} [list 0 $msp]
+
+test scalarmult-1.6 {scalarmult sec2 pub1} {
+  list [nacl::scalarmult result $sec2 $pub1] $result
+} [list 0 $msp]
+
+# cleanup
+::tcltest::cleanupTests
+return
