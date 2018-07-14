@@ -1,0 +1,95 @@
+# Public-key cryptography authenticated encryption using nacl::box
+
+package require nacl
+
+nacl::box keypair pub1 sec1
+nacl::box keypair pub2 sec2
+set nonce [nacl::randombytes box -nonce]
+set message {My Secret Message}
+
+if {[nacl::box encrypted $message $nonce $pub2 $sec1] == 0} {
+  if {[nacl::box open decrypted $encrypted $nonce $pub1 $sec2] == 0} {
+    puts "message decrypted = '$decrypted'"
+  }
+}
+
+# Public-key cryptography signatures using nacl::sign
+
+package require nacl
+
+nacl::sign keypair pub sec
+set message {My Message}
+
+if {[nacl::sign encrypted $message $sec] == 0} {
+  if {[nacl::sign verify decrypted $encrypted $pub] == 0} {
+    puts "signed message decrypted = '$decrypted'"
+  }
+}
+
+Secret-key cryptography authenticated encryption using nacl::secretbox
+
+package require nacl
+
+set key [nacl::randombytes secretbox -key]
+set nonce [nacl::randombytes secretbox -nonce]
+set message {My Secret Message}
+
+if {[nacl::secretbox encrypted $message $nonce $key] == 0} {
+  if {[nacl::secretbox open decrypted $encrypted $nonce $key] == 0} {
+    puts "message decrypted = '$decrypted'"
+  }
+}
+
+# Secret-key cryptography encryption using nacl::stream
+
+package require nacl
+
+set key [nacl::randombytes stream -key]
+set nonce [nacl::randombytes stream -nonce]
+set message {My Secret Message}
+
+if {[nacl::stream encrypted $message $nonce $key] == 0} {
+  if {[nacl::stream decrypted $encrypted $nonce $key] == 0} {
+    puts "message decrypted = '$decrypted'"
+  }
+}
+
+# Secret-key cryptography authentication using nacl::auth
+
+package require nacl
+
+set key [nacl::randombytes auth -key]
+set message {My Message}
+
+if {[nacl::auth -hmac512256 auth $message $key] == 0} {
+  if {[nacl::auth verify -hmac512256 $auth $message $key] == 0} {
+    puts {authentication OK}
+  }
+}
+
+# Secret-key cryptography one-time authentication using nacl::onetimeauth
+
+package require nacl
+
+set key [nacl::randombytes onetimeauth -key]
+set message {My Message}
+
+if {[nacl::onetimeauth auth $message $key] == 0} {
+  if {[nacl: onetimeauth verify $auth $message $key] == 0} {
+    puts {one-time authentication OK}
+  }
+}
+
+# Hashing using nacl::hash
+
+package require nacl
+
+if {[nacl::hash -sha256 hash {NaCl does SHA256}] == 0} {
+}
+
+# or
+
+package require nacl
+
+if {[nacl::hash -sha512 hash {NaCl does SHA512}] == 0} {
+}

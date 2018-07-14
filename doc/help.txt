@@ -1,0 +1,66 @@
+* info
+  nacl::info
+
+* rcsid
+  nacl::rcsid
+
+* randombytes
+  nacl::randombytes names
+  nacl::randombytes source ?random|urandom|secrandomcopybytes|cryptgenrandom|default?
+  nacl::randombytes lengthValue
+  nacl::randombytes box ?-nonce?
+  nacl::randombytes scalarmult ?-scalar|-group?
+  nacl::randombytes secretbox ?-nonce|-key?
+  nacl::randombytes stream ?-nonce|-key?
+  nacl::randombytes auth ?-key?
+  nacl::randombytes onetimeauth ?-key?
+
+* crypto_box = crypto_box_curve25519xsalsa20poly1305
+  nacl::box info
+    cipher +16 nonce 24 public-key 32 secret-key 32
+  nacl::box keypair publicKeyVariable secretKeyVariable
+  nacl::box cipherVariable messageValue nonceValue publicKeyValue secretKeyValue
+  nacl::box open messageVariable cipherValue nonceValue publicKeyValue secretKeyValue
+
+* crypto_scalarmult = crypto_scalarmult_curve25519
+  nacl::scalarmult info
+    result 32 scalar 32 group 32
+  nacl::scalarmult resultVariable scalarValue groupValue
+  nacl::scalarmult base resultVariable scalarValue
+
+* crypto_sign = crypto_sign_ed25519
+  nacl::sign info
+    sign +64 nonce 24 public-key 32 secret-key 64
+  nacl::sign keypair publicKeyVariable secretKeyVariable
+  nacl::sign signedVariable messageValue secretKeyValue
+  nacl::sign verify messageVariable signedValue publicKeyValue
+
+* crypto_secretbox = crypto_secretbox_xsalsa20poly1305
+  nacl::secretbox info
+    cipher +16 nonce 24 key 32
+  nacl::secretbox cipherVariable messageValue nonceValue keyValue
+  nacl::secretbox open messageVariable cipherValue nonceValue keyValue
+
+* crypto_stream = crypto_stream_xsalsa20
+  nacl::stream info
+    cipher +0 nonce 24 key 32
+  nacl::stream generate cipherVariable nonceValue keyValue
+  nacl::stream cipherVariable messageValue nonceValue keyValue
+
+* crypto_auth_hmacsha256_ref, crypto_auth_hmacsha512256_ref
+  nacl::auth info
+    auth 32 key 32
+  nacl::auth ?-hmac256|-hmac512256? authVariable messageValue keyValue
+  nacl::auth verify -hmac256|-hmac512256 authValue messageValue keyValue
+
+* crypto_onetimeauth = crypto_onetimeauth_poly1305
+  nacl::info
+    auth 16 key 32
+  nacl::onetimeauth authVariable messageValue keyValue
+  nacl::onetimeauth verify authValue messageValue keyValue
+
+* crypto_hash_sha256_ref, crypto_hash = crypto_hash_sha512
+  nacl::hash info
+    sha256 32 sha512 64
+  nacl::hash ?-sha256|-sha512? hashVariable messageValue
+

@@ -1,0 +1,26 @@
+
+  http://nacl.cr.yp.to/index.html
+
+  Introduction
+
+  NaCl (pronounced "salt") is a new easy-to-use high-speed software library for
+  network communication, encryption, decryption, signatures, etc. NaCl's goal is
+  to provide all of the core operations needed to build higher-level cryptographic
+  tools.
+
+  Of course, other libraries already exist for these core operations. NaCl advances
+  the state of the art by improving security, by improving usability, and by
+  improving speed.
+
+  The following report contrasts NaCl with other libraries from a security perspective:
+  (PDF) Daniel J. Bernstein, Tanja Lange, Peter Schwabe, "The security impact of a new
+  cryptographic library". Pages 159–176 in Proceedings of LatinCrypt 2012, edited by
+  Alejandro Hevia and Gregory Neven, Lecture Notes in Computer Science 7533, Springer,
+  2012. ISBN 978-3-642-33480-1.
+
+
+  http://nacl.cr.yp.to/features.html
+
+  No copyright restrictions
+  All of the NaCl software is in the public domain.
+

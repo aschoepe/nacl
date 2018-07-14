@@ -1,0 +1,8 @@
+'\"
+.so man.macros
+.TH nacl n 1.0 "Tcl-Extensions"
+.HS nacl tcl
+.BS
+'\" Note:  do not modify the .SH NAME line immediately below!
+.SH NAME
+nacl \- tcl package for Networking and Cryptography library (pronounced "salt")
