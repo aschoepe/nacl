@@ -1,0 +1,50 @@
+# BuildType: MSys / gcc
+
+proc Build_nacl { libName libVersion buildDir instDir devDir distDir } {
+    SetLibHomepage     $libName "http://sourceforge.net/projects/tclsnippets"
+    SetLibDependencies $libName "Tcl"
+
+    set buildDirMSys     [MSysPath $buildDir]
+    set instDirMSys      [MSysPath $instDir]
+    set rootBuildDirMSys [MSysPath [GetBuildDir]]
+
+    if { [UseStage "Extract"] } {
+        ExtractLibrary $libName $buildDir
+    }
+
+    if { [UseStage "Configure"] } {
+        set cmd ""
+        append cmd "cd $buildDirMSys ; "
+        append cmd "$buildDirMSys/configure "
+        append cmd     "--enable-shared "
+        append cmd     "--build=[GetMingwVersion] "
+        append cmd     "--prefix=$instDirMSys --exec-prefix=$instDirMSys "
+        append cmd     "--with-tcl=$rootBuildDirMSys/Tcl "
+        if { [Is64Bit] } {
+            append cmd "--enable-64bit "
+        }
+        if { [IsDebugBuild] } {
+            append cmd "--enable-symbols "
+        } else {
+            append cmd "--disable-symbols "
+        }
+
+        MSysRun $libName "$cmd"
+    }
+
+    if { [UseStage "Compile"] } {
+        MSysBuild $libName $buildDir "install-binaries"
+    }
+
+    if { [UseStage "Distribute"] } {
+        LibFileCopy "$instDir"  "$devDir/[GetTclDir]"   "*"  true
+        LibFileCopy "$instDir"  "$distDir/[GetTclDir]"  "*"  true
+
+        FileRename "$devDir/[GetTclDir]/lib/nacl$libVersion"  "$devDir/[GetTclDir]/lib/nacl-$libVersion"
+        FileRename "$distDir/[GetTclDir]/lib/nacl$libVersion"  "$distDir/[GetTclDir]/lib/nacl-$libVersion"
+
+        if { [IsDebugBuild] } {
+            ErrorAppend "No Debug distribution actions specified for $libName" "Warning"
+        }
+    }
+}
