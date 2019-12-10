@@ -259,9 +259,6 @@
 #define TRUE (!FALSE)
 #endif
 
-static char rcs[] = "@(#)nacl.c $Revision: 1.1 $ $Date: 2016/08/11 20:00:56 $ (BSD 3 License) Alexander Schoepe, Bochum, DE";
-
-
 /*
    nacl::randombytes names
    nacl::randombytes source ?random|urandom|secrandomcopybytes|cryptgenrandom|default?
@@ -2451,12 +2448,6 @@ static int Tnacl_Hash(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_O
 // Not implemented for calling from Tcl
 
 
-static int Tnacl_RcsId (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
-  Tcl_SetObjResult(interp, Tcl_NewStringObj(rcs, -1));
-  return TCL_OK;
-}
-
-
 static int Tnacl_Info (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   Tcl_SetObjResult(interp, Tcl_NewStringObj(TWEETNACL_VERSION, -1));
   Tcl_Obj *lObjPtr = Tcl_NewListObj(0, NULL);
@@ -2583,7 +2574,6 @@ int Nacl_Init(Tcl_Interp *interp) {
   Tcl_CreateObjCommand(interp, "::nacl::hash", Tnacl_Hash, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
   // information functions
-  Tcl_CreateObjCommand(interp, "::nacl::rcsid", Tnacl_RcsId, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
   Tcl_CreateObjCommand(interp, "::nacl::info", Tnacl_Info, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
   Tcl_PkgProvide(interp, PACKAGE_NAME, PACKAGE_VERSION);
