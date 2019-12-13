@@ -1,107 +1,61 @@
-This is a sample extension showing an implementation of the Tcl Extension
-Architecture (TEA).  Please see the webpage
 
-	http://www.tcl.tk/doc/tea/
+    NaCl: Networking and Cryptography library (pronounced "salt")
 
-for more details on TEA.  You can also read the enclosed "tea.pdf" document
-for instructions on how to adapt this sample extension to your extension.
 
-This package is a freely available open source package.  You can do
-virtually anything you like with it, such as modifying it, redistributing
-it, and selling it either in whole or in part.  See the file
-"license.terms" for complete information.
+    This directory contains a freely distributable thread-safe extension to Tcl/Tk called nacl.
 
-CONTENTS
-========
-The following is a short description of the files you will find in
-the sample extension.
 
-Makefile.in	Makefile template.  The configure script uses this file to
-		produce the final Makefile.
+SYSNOPSIS
 
-README		This file
+    NaCl (pronounced "salt") is a new easy-to-use high-speed software library for
+    network communication, encryption, decryption, signatures, etc. NaCl's goal is
+    to provide all of the core operations needed to build higher-level cryptographic
+    tools.
 
-README.sha	A description of the extension itself.
+    Of course, other libraries already exist for these core operations. NaCl advances
+    the state of the art by improving security, by improving usability, and by
+    improving speed.
 
-aclocal.m4	Generated file.  Do not edit.  Autoconf uses this as input
-		when generating the final configure script.  See "tcl.m4"
-		below.
+    For information on how to use these commands, see the examples, hints and the home
+    pages at https://tcl.sowaswie.de/repos/fossil/nacl.
+    
 
-configure	Generated file.  Do not edit.  This must be regenerated
-		anytime configure.in or tclconfig/tcl.m4 changes.
+GETTING THE CODE
 
-configure.in	Configure script template.  Autoconf uses this file as input
-		to produce the final configure script.
+    The development repository is hosted at https://tcl.sowaswie.de/repos/fossil/nacl
+    You are encouraged to use trunk.
 
-pkgIndex.tcl.in Package index template.  The configure script will use
-		this file as input to create pkgIndex.tcl.
 
-sample.c	Core Secure Hash Algorithm code.
+COMPILING nacl
 
-sample.h	Header file for functions in the C files.
+    Go to the main directory and invoke the configure script:
+    
+        ./configure
+	make
+        make test
+        make install
 
-sha1.n		Unix nroff man page
+    Since nacl is TEA-compatible you should be able to build it using the MinGW build
+    environment for Windows. There is also the MSVC nmake file so you can compile the
+    package with Microsoft tools.  Refer to the README in the win directory for more
+    details about building on Windows.
 
-tclsample.c	Implementation of new Tcl command "sha1".
+    The compile process will build the nacl shared library suitable for loading into
+    the Tcl shell using standard "package require" mechanism.
 
-tea.pdf		PDF file describing the current implementation of the
-		Tcl Extension Architecture
 
-tclconfig/	This directory contains various template files that build
-		the configure script.  They should not need modification.
+REPORTING BUGS
 
-	install-sh	Program used for copying binaries and script files
-			to their install locations.
+    Please head to https://tcl.sowaswie.de/repos/fossil/nacl/ticket and
+    click on "New Ticket". Log in as anonymous and report your findings.
+    If you prefer to have an individual login write Alex a mail.
 
-	tcl.m4		Collection of Tcl autoconf macros.  Included by
-			aclocal.m4 to define SC_* macros.
 
-UNIX BUILD
-==========
+HISTORY
 
-Building under most UNIX systems is easy, just run the configure script
-and then run make. For more information about the build process, see
-the tcl/unix/README file in the Tcl src dist. The following minimal
-example will install the extension in the /opt/tcl directory.
+    The core NaCl development team consists of Daniel J. Bernstein (University of
+    Illinois at Chicago and Technische Universiteit Eindhoven), Tanja Lange (Technische
+    Universiteit Eindhoven), and Peter Schwabe (Radboud Universiteit Nijmegen).
 
-	$ cd sampleextension
-	$ ./configure --prefix=/opt/tcl
-	$ make
-	$ make install
+    The nacl tcl packge was started by Alexander Schoepe (alx.tcl@sowaswie.de).
 
-WINDOWS BUILD
-=============
-
-The recommended method to build extensions under windows is to use the
-Msys + Mingw build process. This provides a Unix-style build while
-generating native Windows binaries. Using the Msys + Mingw build tools
-means that you can use the same configure script as per the Unix build
-to create a Makefile. See the tcl/win/README file for the URL of
-the Msys + Mingw download.
-
-If you have VC++ then you may wish to use the files in the win
-subdirectory and build the extension using just VC++. These files have
-been designed to be as generic as possible but will require some
-additional maintenance by the project developer to synchronise with
-the TEA configure.in and Makefile.in files. Instructions for using the
-VC++ makefile are written in the first part of the Makefile.vc
-file.
-
-INSTALLATION
-============
-
-The installation of a TEA package is structure like so:
-
-         $exec_prefix
-          /       \
-        lib       bin
-         |         |
-   PACKAGEx.y   (dependent .dll files on Windows)
-         |
-  pkgIndex.tcl (.so|.dll files)
-
-The main .so|.dll library file gets installed in the versioned PACKAGE
-directory, which is OK on all platforms because it will be directly
-referenced with by 'load' in the pkgIndex.tcl file.  Dependent DLL files on
-Windows must go in the bin directory (or other directory on the user's
-PATH) in order for them to be found.
