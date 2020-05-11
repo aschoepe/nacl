@@ -1,0 +1,3 @@
+*.tcl linguist-detectable=true
+*.c linguist-detectable=true
+*.m4 linguist-detectable=false
