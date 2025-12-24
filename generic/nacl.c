@@ -253,6 +253,7 @@
 #include "tweetnacl.h"
 #include "crypto_reference.h"
 #include "randombytes.h"
+#include "manifest.h"
 
 #ifndef FALSE
 #define FALSE 0
@@ -2540,6 +2541,20 @@ static int Tnacl_Info (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_
   Tcl_ListObjAppendElement(interp, llObjPtr, Tcl_NewStringObj("All of the NaCl and TweetNaCl software is in the public domain.", -1));
   Tcl_ListObjAppendElement(interp, lObjPtr, llObjPtr);
 
+  Tcl_ListObjAppendElement(interp, lObjPtr, Tcl_NewStringObj("MANIFEST", -1));
+  Tcl_Obj *mlObjPtr = Tcl_NewListObj(0, NULL);
+  Tcl_ListObjAppendElement(interp, mlObjPtr, Tcl_NewStringObj("release", -1));
+  Tcl_ListObjAppendElement(interp, mlObjPtr, Tcl_NewStringObj(RELEASE_VERSION, -1));
+  Tcl_ListObjAppendElement(interp, mlObjPtr, Tcl_NewStringObj("check-in", -1));
+  Tcl_ListObjAppendElement(interp, mlObjPtr, Tcl_NewStringObj(MANIFEST_VERSION, -1));
+  Tcl_ListObjAppendElement(interp, mlObjPtr, Tcl_NewStringObj("date", -1));
+  Tcl_ListObjAppendElement(interp, mlObjPtr, Tcl_NewStringObj(MANIFEST_DATE, -1));
+  Tcl_ListObjAppendElement(interp, mlObjPtr, Tcl_NewStringObj("build", -1));
+  Tcl_ListObjAppendElement(interp, mlObjPtr, Tcl_NewStringObj(FOSSIL_BUILD_HASH, -1));
+  Tcl_ListObjAppendElement(interp, mlObjPtr, Tcl_NewStringObj("uuid", -1));
+  Tcl_ListObjAppendElement(interp, mlObjPtr, Tcl_NewStringObj(MANIFEST_UUID, -1));
+  Tcl_ListObjAppendElement(interp, lObjPtr, mlObjPtr);
+
   Tcl_ListObjAppendElement(interp, lObjPtr, Tcl_NewStringObj("crypto_box", -1));
   Tcl_ListObjAppendElement(interp, lObjPtr, Tcl_NewStringObj("crypto_box_curve25519xsalsa20poly1305", -1));
   Tcl_ListObjAppendElement(interp, lObjPtr, Tcl_NewStringObj("crypto_box_BOXZEROBYTES", -1));
@@ -2613,6 +2628,76 @@ static int Tnacl_Info (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_
 }
 
 
+/*
+ * Build Info Command - command to return build info for package
+ */
+
+#ifndef STRINGIFY
+#  define STRINGIFY(x) STRINGIFY1(x)
+#  define STRINGIFY1(x) #x
+#endif
+
+int BuildInfoCommand(Tcl_Interp* interp)	{
+  Tcl_CmdInfo info;
+
+if (Tcl_GetCommandInfo(interp, "::tcl::build-info", &info)) {
+    Tcl_CreateObjCommand(interp, "::nacl::build-info", info.objProc, (void *)(PACKAGE_VERSION "+" MANIFEST_UUID
+#if defined(__clang__) && defined(__clang_major__)
+      ".clang-" STRINGIFY(__clang_major__)
+#if __clang_minor__ < 10
+      "0"
+#endif
+      STRINGIFY(__clang_minor__)
+#endif
+#if defined(__cplusplus) && !defined(__OBJC__)
+      ".cplusplus"
+#endif
+#ifndef NDEBUG
+      ".debug"
+#endif
+#if !defined(__clang__) && !defined(__INTEL_COMPILER) && defined(__GNUC__)
+      ".gcc-" STRINGIFY(__GNUC__)
+#if __GNUC_MINOR__ < 10
+      "0"
+#endif
+      STRINGIFY(__GNUC_MINOR__)
+#endif
+#ifdef __INTEL_COMPILER
+      ".icc-" STRINGIFY(__INTEL_COMPILER)
+#endif
+#ifdef TCL_MEM_DEBUG
+      ".memdebug"
+#endif
+#if defined(_MSC_VER)
+      ".msvc-" STRINGIFY(_MSC_VER)
+#endif
+#ifdef USE_NMAKE
+      ".nmake"
+#endif
+#ifndef TCL_CFG_OPTIMIZED
+      ".no-optimize"
+#endif
+#ifdef __OBJC__
+      ".objective-c"
+#if defined(__cplusplus)
+      "plusplus"
+#endif
+#endif
+#ifdef TCL_CFG_PROFILED
+      ".profile"
+#endif
+#ifdef PURIFY
+      ".purify"
+#endif
+#ifdef STATIC_BUILD
+      ".static"
+#endif
+		), NULL);
+  }
+  return TCL_OK;
+}
+
+
 #ifdef _WIN32
 DECLSPEC_EXPORT
 #endif
@@ -2641,6 +2726,9 @@ int Nacl_Init(Tcl_Interp *interp) {
 
   // information functions
   Tcl_CreateObjCommand(interp, "::nacl::info", Tnacl_Info, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+
+  // build info
+  BuildInfoCommand(interp);
 
   Tcl_PkgProvide(interp, PACKAGE_NAME, PACKAGE_VERSION);
   return TCL_OK;

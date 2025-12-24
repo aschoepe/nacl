@@ -1,5 +1,5 @@
-C added\smanifest.h\sgeneration\sto\sMakefile.in
-D 2025-12-24T20:35:42.957
+C Tnacl_Info\shas\snow\smanifest\sinformation;\sadded\sBuildInfoCommand\sTIP\s599
+D 2025-12-24T20:42:10.943
 F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
 F LICENSE.nacl a11e84ee203968974e6341fa8315006a1e2cb14a4f91a216f234c787b79f7230
 F LICENSE.terms 8bb94bd557d785c1c7a20282da941bfa6554597e8c2a8af8a33d9ef1b7dfaf86
@@ -20,7 +20,7 @@ F generic/crypto_auth_hmacsha512256.c 95435d998c8de59f3d537af660c609155c2130a51b
 F generic/crypto_hash_sha256.c cb99e51b557432ed185144a9b6f2160a206158c809bb977968ab92744c1618f5
 F generic/crypto_hashblocks_sha256.c 71f663c3d8ad51b186997902c32a1869abb616d1cc8625f75d68a92021155125
 F generic/crypto_reference.h f360b7fb68d1fd61c71eeaa6ab7562d9d6faeacdf8ec05f4787a9baf5b308275
-F generic/nacl.c 346a523ae0d0de44db73e71e18cb2f5200c57e745339397bc56202f9c173d960 x
+F generic/nacl.c 0662c510034f05618d74ed9152dad6b0b8154b5e0e8a1f305745b33e63a9e165 x
 F generic/randombytes.c 73ee98ff51e5745fd7a350de8a9375fb8a64b5055f584771e28dff4323e448bf
 F generic/randombytes.h af7f7b0d4074e7f371ac725511c51361a1113f98536b8396df4959329b8c5dc1
 F generic/tweetnacl.c ce64213575c9d7e1547b6c170824c3a8eaa2948c9bca9b1f87c9beedb0ef4137
@@ -49,8 +49,8 @@ F win/nmakehlp.c 190bf8b40f6f90eeb6cbc1e5c13a19fc7ad870e479e0314c88174f71bf9e28a
 F win/rules-ext.vc 566230fdd999a957c27007ebfa8022aa523bdb64243d8efcdad1c9c8fc3cdae7
 F win/rules.vc 6eeb14ea0b8c551b93a1d3721a7474819e966b65a208523ab8eb1593c565e226
 F win/targets.vc 96a25a1fa6e9e9cfb348fd3760a5395b4ce8acafc8ed10f0412937ec200d5dbd
-P aa4c17e6dfef2fd6d24c87efd9cdfc45007876568f6b093011c106a5ae40c11b
-R 3f9233fa34672cc812b0db9c2b40a1ae
+P d8845e2d0db9ba94b8b5e700890b89acf6224839ff576b528ee63006fea008e6
+R 141c874eb033b9fee9b44792e6b215b7
 U alex
-Z 072690234951f63f7b19f3d78d0f1fe1
+Z c165353d57b8ddd0ea514e3c9a12fbda
 # Remove this line to create a well-formed Fossil manifest.
