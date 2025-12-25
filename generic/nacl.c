@@ -261,6 +261,8 @@
 #define TRUE (!FALSE)
 #endif
 
+static char mTag[] = "@(#)nacl.c v" RELEASE_VERSION " " MANIFEST_VERSION " " MANIFEST_DATE " (BSD 3 License) Alexander Schoepe, Bochum, DE";
+
 /* Compatibility for Tcl 8.6 and 9.0 */
 #if TCL_MAJOR_VERSION < 9
 #   ifndef Tcl_Size

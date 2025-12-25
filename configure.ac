@@ -4,7 +4,7 @@ dnl	generate the file "configure", which is run during Tcl installation
 dnl	to configure the system for the local environment.
 
 #-----------------------------------------------------------------------
-# Sample configure.in for Tcl Extensions.  The only places you should
+# Sample configure.ac for Tcl Extensions.  The only places you should
 # need to modify this file are marked by the string __CHANGE__
 #-----------------------------------------------------------------------
 
@@ -71,7 +71,6 @@ TEA_SETUP_COMPILER
 # and PKG_TCL_SOURCES.
 #-----------------------------------------------------------------------
 
-AC_DEFINE(NO_PNG)
 AC_DEFINE(TWEETNACL_VERSION, "20140427")
 
 TEA_ADD_SOURCES([randombytes.c tweetnacl.c crypto_hashblocks_sha256.c crypto_hash_sha256.c crypto_auth_hmacsha256.c crypto_auth_hmacsha512256.c nacl.c])
@@ -152,7 +151,6 @@ TEA_CONFIG_CFLAGS
 TEA_ENABLE_SYMBOLS
 
 #--------------------------------------------------------------------
-#--------------------------------------------------------------------
 
 CHECK_FOR_RANDOM_DEVICES
 CHECK_FOR_SECRANDOMCOPYBYTES
@@ -189,9 +187,24 @@ TEA_PROG_TCLSH
 #TEA_PROG_WISH
 
 #--------------------------------------------------------------------
-# Finally, substitute all of the various values into the Makefile.
-# You may alternatively have a special pkgIndex.tcl.in or other files
-# which require substituting th AC variables in.  Include these here.
+# Setup a *Config.sh.in configuration file.
 #--------------------------------------------------------------------
 
-AC_OUTPUT([Makefile pkgIndex.tcl])
+#TEA_EXPORT_CONFIG([sample])
+#AC_SUBST(SAMPLE_VAR)
+
+#--------------------------------------------------------------------
+# Specify files to substitute AC variables in. You may alternatively
+# have a special pkgIndex.tcl.in or other files which require
+# substituting the AC variables in. Include these here.
+#--------------------------------------------------------------------
+
+AC_CONFIG_FILES([Makefile pkgIndex.tcl])
+#AC_CONFIG_FILES([sampleConfig.sh])
+
+#--------------------------------------------------------------------
+# Finally, substitute all of the various values into the files
+# specified with AC_CONFIG_FILES.
+#--------------------------------------------------------------------
+
+AC_OUTPUT
