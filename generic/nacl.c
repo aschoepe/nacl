@@ -233,7 +233,8 @@
 */
 
 
-#define MY_TCL_INITSTUBS "8.6-"
+// For Tcl 8.6 up to any Tcl 9 version. Note that the upper bound 10 is exclusive.
+#define MY_TCL_INITSTUBS "8.6-10"
 // TWEETNACL_VERSION
 
 #ifdef _WIN32
