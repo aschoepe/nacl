@@ -9,7 +9,7 @@
     Illinois at Chicago and Technische Universiteit Eindhoven), Tanja Lange (Technische
     Universiteit Eindhoven), and Peter Schwabe (Radboud Universiteit Nijmegen).
 
-    Copyright (C) 2016-2019 Alexander Schoepe, Bochum, DE, <alx.tcl@sowaswie.de>
+    Copyright (C) 2016-2026 Alexander Schoepe, Bochum, DE, <alx.tcl(at)sowaswie.de>
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without modification,
@@ -233,9 +233,6 @@
 */
 
 
-#define MY_TCL_INITSTUBS "8.6"
-// TWEETNACL_VERSION
-
 #ifdef _WIN32
 #include <windows.h>
 #ifndef DECLSPEC_EXPORT
@@ -253,10 +250,25 @@
 #include "tweetnacl.h"
 #include "crypto_reference.h"
 #include "randombytes.h"
+#include "manifest.h"
 
 #ifndef FALSE
 #define FALSE 0
 #define TRUE (!FALSE)
+#endif
+
+/* Compatibility for Tcl 8.6 and 9.0 */
+#if TCL_MAJOR_VERSION < 9
+#   ifndef Tcl_Size
+    typedef int Tcl_Size;
+#   endif
+#   define Tcl_GetSizeIntFromObj Tcl_GetIntFromObj
+#   ifndef TCL_SIZE_MAX
+#   define TCL_SIZE_MAX INT_MAX
+#   endif
+#   ifndef TCL_SIZE_MODIFIER
+#   define TCL_SIZE_MODIFIER ""
+#   endif
 #endif
 
 /*
@@ -356,14 +368,16 @@ static int Tnacl_RandomBytes(ClientData clientData, Tcl_Interp *interp, int objc
   }
 
   int len = 0;
+  Tcl_Size tmpIdx;
 
   if (Tcl_GetIntFromObj(interp, objv[1], &len) == TCL_OK) {
     cmd = TNACL_RANDOM_LENGTH;
   } else {
     Tcl_ResetResult(interp);
-    if (Tcl_GetIndexFromObj(interp, objv[1], command, "command", 0, (int *)&cmd) != TCL_OK) {
+    if (Tcl_GetIndexFromObj(interp, objv[1], command, "command", 0, &tmpIdx) != TCL_OK) {
       return TCL_ERROR;
     }
+    cmd = (enum command)tmpIdx;
   }
 
   Tcl_Obj *bObjPtr = Tcl_NewByteArrayObj(NULL, 0);
@@ -422,9 +436,10 @@ static int Tnacl_RandomBytes(ClientData clientData, Tcl_Interp *interp, int objc
         Tcl_WrongNumArgs(interp, 1, objv, "source ?source?");
         return TCL_ERROR;
       }
-      if (Tcl_GetIndexFromObj(interp, objv[2], source, "source", 0, (int *)&src) != TCL_OK) {
+      if (Tcl_GetIndexFromObj(interp, objv[2], source, "source", 0, &tmpIdx) != TCL_OK) {
 	return TCL_ERROR;
       }
+      src = (enum source)tmpIdx;
       switch (src) {
 #ifdef HAVE_DEVICE_RANDOM
         case TNACL_RANDOM_DEV_RANDOM: {
@@ -481,8 +496,10 @@ static int Tnacl_RandomBytes(ClientData clientData, Tcl_Interp *interp, int objc
         return TCL_ERROR;
       }
       if (objc > 2) {
-	if (Tcl_GetIndexFromObj(interp, objv[2], enon, "-option", 0, (int *)&optn) != TCL_OK)
+  Tcl_Size tmpIdx;
+	if (Tcl_GetIndexFromObj(interp, objv[2], enon, "-option", 0, &tmpIdx) != TCL_OK)
 	  return TCL_ERROR;
+	optn = (enum enon)tmpIdx;
       } else {
         optn = TNACL_RANDOM_NONCE_ONLY;
       }
@@ -501,8 +518,9 @@ static int Tnacl_RandomBytes(ClientData clientData, Tcl_Interp *interp, int objc
         return TCL_ERROR;
       }
       if (objc > 2) {
-	if (Tcl_GetIndexFromObj(interp, objv[2], enosg, "-option", 0, (int *)&optsg) != TCL_OK)
+	if (Tcl_GetIndexFromObj(interp, objv[2], enosg, "-option", 0, &tmpIdx) != TCL_OK)
 	  return TCL_ERROR;
+	optsg = (enum enosg)tmpIdx;
       } else {
         optsg = TNACL_RANDOM_SCALAR;
       }
@@ -526,8 +544,9 @@ static int Tnacl_RandomBytes(ClientData clientData, Tcl_Interp *interp, int objc
         return TCL_ERROR;
       }
       if (objc > 2) {
-	if (Tcl_GetIndexFromObj(interp, objv[2], enonk, "-option", 0, (int *)&optnk) != TCL_OK)
+	if (Tcl_GetIndexFromObj(interp, objv[2], enonk, "-option", 0, &tmpIdx) != TCL_OK)
 	  return TCL_ERROR;
+	optnk = (enum enonk)tmpIdx;
       } else {
         optnk = TNACL_RANDOM_NONCE;
       }
@@ -551,8 +570,9 @@ static int Tnacl_RandomBytes(ClientData clientData, Tcl_Interp *interp, int objc
         return TCL_ERROR;
       }
       if (objc > 2) {
-	if (Tcl_GetIndexFromObj(interp, objv[2], enok, "-option", 0, (int *)&optk) != TCL_OK)
+	if (Tcl_GetIndexFromObj(interp, objv[2], enok, "-option", 0, &tmpIdx) != TCL_OK)
 	  return TCL_ERROR;
+	optk = (enum ennk)tmpIdx;
       } else {
         optk = TNACL_RANDOM_KEY_ONLY;
       }
@@ -717,8 +737,12 @@ static int Tnacl_Box (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_O
     return TCL_ERROR;
   }
 
-  if (Tcl_GetIndexFromObj(interp, objv[1], command, "command", 0, (int *)&cmd) != TCL_OK)
+  Tcl_Size tmpIdx;
+  if (Tcl_GetIndexFromObj(interp, objv[1], command, "command", 0, &tmpIdx) != TCL_OK) {
     cmd = TNACL_BOX;
+  } else {
+    cmd = (enum command)tmpIdx;
+  }
 
   switch (cmd) {
     case TNACL_BOX_INFO: {
@@ -790,7 +814,8 @@ static int Tnacl_Box (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_O
 
       Tcl_Obj *cObjPtr;
       unsigned char *c, *m, *n, *pk, *sk, *cBuf, *mBuf;
-      int rc, mLen, nLen, pkLen, skLen, bufLen, outLen;
+      int rc;
+      Tcl_Size mLen, nLen, pkLen, skLen, bufLen, outLen;
 
       // 1:cipherVariable
       cObjPtr = Tcl_ObjGetVar2(interp, objv[1], (Tcl_Obj*) NULL, 0);
@@ -859,7 +884,8 @@ static int Tnacl_Box (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_O
       }
       Tcl_Obj *cObjPtr;
       unsigned char *c, *m, *n, *pk, *sk, *cBuf, *mBuf;
-      int rc, cLen, nLen, pkLen, skLen, bufLen, outLen;
+      int rc;
+      Tcl_Size cLen, nLen, pkLen, skLen, bufLen, outLen;
 
       // 2:messageVariable
       cObjPtr = Tcl_ObjGetVar2(interp, objv[2], (Tcl_Obj*) NULL, 0);
@@ -1022,8 +1048,12 @@ static int Tnacl_ScalarMult(ClientData clientData, Tcl_Interp *interp, int objc,
     return TCL_ERROR;
   }
 
-  if (Tcl_GetIndexFromObj(interp, objv[1], command, "command", 0, (int *)&cmd) != TCL_OK)
+  Tcl_Size tmpIdx;
+  if (Tcl_GetIndexFromObj(interp, objv[1], command, "command", 0, &tmpIdx) != TCL_OK) {
     cmd = TNACL_SCALARMULT;
+  } else {
+    cmd = (enum command)tmpIdx;
+  }
 
   switch (cmd) {
     case TNACL_SCALARMULT_INFO: {
@@ -1051,7 +1081,8 @@ static int Tnacl_ScalarMult(ClientData clientData, Tcl_Interp *interp, int objc,
 
       Tcl_Obj *qObjPtr;
       unsigned char *q, *n, *p;
-      int rc, nLen, pLen;
+      int rc;
+      Tcl_Size nLen, pLen;
 
       // 1:resultVariable
       qObjPtr = Tcl_ObjGetVar2(interp, objv[1], (Tcl_Obj*) NULL, 0);
@@ -1095,7 +1126,8 @@ static int Tnacl_ScalarMult(ClientData clientData, Tcl_Interp *interp, int objc,
       }
       Tcl_Obj *qObjPtr;
       unsigned char *q, *n;
-      int rc, nLen;
+      int rc;
+      Tcl_Size nLen;
 
       // 2:resultVariable
       qObjPtr = Tcl_ObjGetVar2(interp, objv[2], (Tcl_Obj*) NULL, 0);
@@ -1231,8 +1263,12 @@ static int Tnacl_Sign (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_
     return TCL_ERROR;
   }
 
-  if (Tcl_GetIndexFromObj(interp, objv[1], command, "command", 0, (int *)&cmd) != TCL_OK)
+  Tcl_Size tmpIdx;
+  if (Tcl_GetIndexFromObj(interp, objv[1], command, "command", 0, &tmpIdx) != TCL_OK) {
     cmd = TNACL_SIGN;
+  } else {
+    cmd = (enum command)tmpIdx;
+  }
 
   switch (cmd) {
     case TNACL_SIGN_INFO: {
@@ -1302,7 +1338,8 @@ static int Tnacl_Sign (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_
 
       Tcl_Obj *smObjPtr;
       unsigned char *sm, *m, *sk;
-      int rc, smLen, mLen, skLen;
+      int rc;
+      Tcl_Size smLen, mLen, skLen;
 
       // 1:signedVariable
       smObjPtr = Tcl_ObjGetVar2(interp, objv[1], (Tcl_Obj*) NULL, 0);
@@ -1347,7 +1384,8 @@ static int Tnacl_Sign (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_
 
       Tcl_Obj *mObjPtr;
       unsigned char *sm, *m, *pk;
-      int rc, smLen, mLen, pkLen;
+      int rc;
+      Tcl_Size smLen, mLen, pkLen;
 
       // 2:messageVariable
       mObjPtr = Tcl_ObjGetVar2(interp, objv[2], (Tcl_Obj*) NULL, 0);
@@ -1496,8 +1534,12 @@ static int Tnacl_SecretBox (ClientData clientData, Tcl_Interp *interp, int objc,
     return TCL_ERROR;
   }
 
-  if (Tcl_GetIndexFromObj(interp, objv[1], command, "command", 0, (int *)&cmd) != TCL_OK)
+  Tcl_Size tmpIdx;
+  if (Tcl_GetIndexFromObj(interp, objv[1], command, "command", 0, &tmpIdx) != TCL_OK) {
     cmd = TNACL_SECRETBOX;
+  } else {
+    cmd = (enum command)tmpIdx;
+  }
 
   switch (cmd) {
     case TNACL_SECRETBOX_INFO: {
@@ -1525,7 +1567,8 @@ static int Tnacl_SecretBox (ClientData clientData, Tcl_Interp *interp, int objc,
 
       Tcl_Obj *cObjPtr;
       unsigned char *c, *m, *n, *k, *cBuf, *mBuf;
-      int rc, mLen, nLen, kLen, bufLen, outLen;
+      int rc;
+      Tcl_Size mLen, nLen, kLen, bufLen, outLen;
 
       // 1:cipherVariable
       cObjPtr = Tcl_ObjGetVar2(interp, objv[1], (Tcl_Obj*) NULL, 0);
@@ -1587,7 +1630,8 @@ static int Tnacl_SecretBox (ClientData clientData, Tcl_Interp *interp, int objc,
       }
       Tcl_Obj *cObjPtr;
       unsigned char *c, *m, *n, *k, *cBuf, *mBuf;
-      int rc, cLen, nLen, kLen, bufLen, outLen;
+      int rc;
+      Tcl_Size cLen, nLen, kLen, bufLen, outLen;
 
       // 2:messageVariable
       cObjPtr = Tcl_ObjGetVar2(interp, objv[2], (Tcl_Obj*) NULL, 0);
@@ -1756,8 +1800,12 @@ static int Tnacl_Stream (ClientData clientData, Tcl_Interp *interp, int objc, Tc
     return TCL_ERROR;
   }
 
-  if (Tcl_GetIndexFromObj(interp, objv[1], command, "command", 0, (int *)&cmd) != TCL_OK)
+  Tcl_Size tmpIdx;
+  if (Tcl_GetIndexFromObj(interp, objv[1], command, "command", 0, &tmpIdx) != TCL_OK) {
     cmd = TNACL_STREAM;
+  } else {
+    cmd = (enum command)tmpIdx;
+  }
 
   switch (cmd) {
     case TNACL_STREAM_INFO: {
@@ -1785,7 +1833,8 @@ static int Tnacl_Stream (ClientData clientData, Tcl_Interp *interp, int objc, Tc
 
       Tcl_Obj *cObjPtr;
       unsigned char *c, *m, *n, *k;
-      int rc, mLen, nLen, kLen;
+      int rc;
+      Tcl_Size mLen, nLen, kLen;
 
       // 1:cipherVariable
       cObjPtr = Tcl_ObjGetVar2(interp, objv[1], (Tcl_Obj*) NULL, 0);
@@ -1833,7 +1882,8 @@ static int Tnacl_Stream (ClientData clientData, Tcl_Interp *interp, int objc, Tc
       }
       Tcl_Obj *cObjPtr;
       unsigned char *c, *n, *k;
-      int rc, nLen, kLen;
+      int rc;
+      Tcl_Size nLen, kLen;
       long len;
 
       // 2:cipherVariable
@@ -1970,19 +2020,22 @@ static int Tnacl_Auth(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_O
   }
 
   int idx = 1;
+  Tcl_Size tmpIdx;
 
-  if (Tcl_GetIndexFromObj(interp, objv[1], command, "command", 0, (int *)&cmd) != TCL_OK) {
+  if (Tcl_GetIndexFromObj(interp, objv[1], command, "command", 0, &tmpIdx) != TCL_OK) {
     cmd = TNACL_AUTH;
   } else {
+    cmd = (enum command)tmpIdx;
     idx++;
   }
 
   hmac = TNACL_AUTH_HMAC512256;
 
   if (objc > 2) {
-    if (Tcl_GetIndexFromObj(interp, objv[idx], option, "-option", 0, (int *)&hmac) != TCL_OK) {
+    if (Tcl_GetIndexFromObj(interp, objv[idx], option, "-option", 0, &tmpIdx) != TCL_OK) {
       hmac = TNACL_AUTH_HMAC512256;
     } else {
+      hmac = (enum option)tmpIdx;
       idx++;
     }
   }
@@ -2011,7 +2064,8 @@ static int Tnacl_Auth(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_O
 
       Tcl_Obj *aObjPtr;
       unsigned char *a, *m, *k;
-      int rc, mLen, kLen;
+      int rc;
+      Tcl_Size mLen, kLen;
 
       // 0:authVariable
       aObjPtr = Tcl_ObjGetVar2(interp, objv[idx + 0], (Tcl_Obj*) NULL, 0);
@@ -2056,7 +2110,8 @@ static int Tnacl_Auth(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_O
       }
 
       unsigned char *a, *m, *k;
-      int rc, aLen, mLen, kLen;
+      int rc;
+      Tcl_Size aLen, mLen, kLen;
 
       // 0:authValue
       a = Tcl_GetByteArrayFromObj(objv[idx + 0], &aLen);
@@ -2170,8 +2225,12 @@ static int Tnacl_OneTimeAuth(ClientData clientData, Tcl_Interp *interp, int objc
     return TCL_ERROR;
   }
 
-  if (Tcl_GetIndexFromObj(interp, objv[1], command, "command", 0, (int *)&cmd) != TCL_OK)
+  Tcl_Size tmpIdx;
+  if (Tcl_GetIndexFromObj(interp, objv[1], command, "command", 0, &tmpIdx) != TCL_OK) {
     cmd = TNACL_ONETIMEAUTH;
+  } else {
+    cmd = (enum command)tmpIdx;
+  }
 
   switch (cmd) {
     case TNACL_ONETIMEAUTH_INFO: {
@@ -2197,7 +2256,8 @@ static int Tnacl_OneTimeAuth(ClientData clientData, Tcl_Interp *interp, int objc
 
       Tcl_Obj *aObjPtr;
       unsigned char *a, *m, *k;
-      int rc, mLen, kLen;
+      int rc;
+      Tcl_Size mLen, kLen;
 
       // 1:authVariable
       aObjPtr = Tcl_ObjGetVar2(interp, objv[1], (Tcl_Obj*) NULL, 0);
@@ -2238,7 +2298,8 @@ static int Tnacl_OneTimeAuth(ClientData clientData, Tcl_Interp *interp, int objc
       }
 
       unsigned char *a, *m, *k;
-      int rc, aLen, mLen, kLen;
+      int rc;
+      Tcl_Size aLen, mLen, kLen;
 
       // 2:authValue
       a = Tcl_GetByteArrayFromObj(objv[2], &aLen);
@@ -2322,7 +2383,8 @@ static int Tnacl_OneTimeAuth(ClientData clientData, Tcl_Interp *interp, int objc
 static int Tnacl_Hash(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   Tcl_Obj *hObjPtr;
   unsigned char *h, *m;
-  int rc = -1, hLen = 0, mLen;
+  int rc = -1;
+  Tcl_Size hLen = 0, mLen;
 
   static const char *const option[] = {
     "info", "-sha256", "-sha512", NULL
@@ -2337,10 +2399,12 @@ static int Tnacl_Hash(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_O
   }
 
   int idx = 1;
+  Tcl_Size tmpIdx;
 
-  if (Tcl_GetIndexFromObj(interp, objv[1], option, "-option|command", 0, (int *)&sha) != TCL_OK) {
+  if (Tcl_GetIndexFromObj(interp, objv[1], option, "-option|command", 0, &tmpIdx) != TCL_OK) {
     sha = TNACL_HASH_SHA512;
   } else {
+    sha = (enum option)tmpIdx;
     idx++;
   }
 
@@ -2546,16 +2610,137 @@ static int Tnacl_Info (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_
   return TCL_OK;
 }
 
+/*
+ *-----------------------------------------------------------------------------
+ *
+ * Tnacl_Manifest --
+ *
+ *  Returns build manifest information as a Tcl dictionary.
+ *
+ * Results:
+ *  A standard Tcl result.
+ *  Interp result is set to a dictionary containing manifest data.
+ *
+ *-----------------------------------------------------------------------------
+ */
 
-#ifdef _WIN32
-DECLSPEC_EXPORT
-#endif
-int Nacl_Init(Tcl_Interp *interp) {
-#ifdef USE_TCL_STUBS
-  if (Tcl_InitStubs(interp, MY_TCL_INITSTUBS, 0) == NULL) {
+static int
+Tnacl_Manifest(
+  ClientData dummy,
+  Tcl_Interp *interp,
+  int objc,
+  Tcl_Obj *const objv[])
+{
+  static const char  vTag[] __attribute__((used)) = "@(#)nacl.c v" RELEASE_VERSION " " MANIFEST_VERSION " " MANIFEST_DATE " (BSD 3 License) Alexander Schoepe, Bochum, DE";
+  (void)vTag;
+
+  if (objc != 1) {
+    Tcl_WrongNumArgs(interp, 1, objv, "");
     return TCL_ERROR;
   }
+
+  Tcl_Obj *dictPtr = Tcl_NewDictObj();
+
+  Tcl_DictObjPut(interp, dictPtr,
+    Tcl_NewStringObj("version", -1),
+    Tcl_NewStringObj(RELEASE_VERSION, -1));
+
+  Tcl_DictObjPut(interp, dictPtr,
+    Tcl_NewStringObj("date", -1),
+    Tcl_NewStringObj(MANIFEST_DATE, -1));
+
+  Tcl_DictObjPut(interp, dictPtr,
+    Tcl_NewStringObj("check-in", -1),
+    Tcl_NewStringObj(MANIFEST_VERSION, -1));
+
+  Tcl_DictObjPut(interp, dictPtr,
+    Tcl_NewStringObj("build-hash", -1),
+    Tcl_NewStringObj(FOSSIL_BUILD_HASH, -1));
+
+  Tcl_DictObjPut(interp, dictPtr,
+    Tcl_NewStringObj("uuid", -1),
+    Tcl_NewStringObj(MANIFEST_UUID, -1));
+
+  Tcl_SetObjResult(interp, dictPtr);
+  return TCL_OK;
+}
+
+
+#ifndef STRINGIFY
+#  define STRINGIFY(x) STRINGIFY1(x)
+#  define STRINGIFY1(x) #x
 #endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif  /* __cplusplus */
+DLLEXPORT int
+Nacl_Init(
+  Tcl_Interp* interp)		/* Tcl interpreter */
+{
+  Tcl_CmdInfo info;
+  // Support any Tcl version from 8.6.0 to 9.x.x, the upper bound is exclusiv.
+  if (Tcl_InitStubs(interp, "8.6-10", 0) == NULL) {
+    return TCL_ERROR;
+  }
+
+  // Build Info Command - command to return build info for package
+  if (Tcl_GetCommandInfo(interp, "::tcl::build-info", &info)) {
+    Tcl_CreateObjCommand(interp, "::nacl::build-info",
+      info.objProc, (void *)(
+		    PACKAGE_VERSION "+" STRINGIFY(MANIFEST_UUID)
+#if defined(__clang__) && defined(__clang_major__)
+			    ".clang-" STRINGIFY(__clang_major__)
+#if __clang_minor__ < 10
+			    "0"
+#endif
+			    STRINGIFY(__clang_minor__)
+#endif
+#if defined(__cplusplus) && !defined(__OBJC__)
+			    ".cplusplus"
+#endif
+#ifndef NDEBUG
+			    ".debug"
+#endif
+#if !defined(__clang__) && !defined(__INTEL_COMPILER) && defined(__GNUC__)
+			    ".gcc-" STRINGIFY(__GNUC__)
+#if __GNUC_MINOR__ < 10
+			    "0"
+#endif
+			    STRINGIFY(__GNUC_MINOR__)
+#endif
+#ifdef __INTEL_COMPILER
+			    ".icc-" STRINGIFY(__INTEL_COMPILER)
+#endif
+#ifdef TCL_MEM_DEBUG
+			    ".memdebug"
+#endif
+#if defined(_MSC_VER)
+			    ".msvc-" STRINGIFY(_MSC_VER)
+#endif
+#ifdef USE_NMAKE
+			    ".nmake"
+#endif
+#ifndef TCL_CFG_OPTIMIZED
+			    ".no-optimize"
+#endif
+#ifdef __OBJC__
+			    ".objective-c"
+#if defined(__cplusplus)
+			    "plusplus"
+#endif
+#endif
+#ifdef TCL_CFG_PROFILED
+			    ".profile"
+#endif
+#ifdef PURIFY
+			    ".purify"
+#endif
+#ifdef STATIC_BUILD
+			    ".static"
+#endif
+		), NULL);
+  }
 
   Tcl_CreateObjCommand(interp, "::nacl::randombytes", Tnacl_RandomBytes, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
@@ -2575,15 +2760,11 @@ int Nacl_Init(Tcl_Interp *interp) {
 
   // information functions
   Tcl_CreateObjCommand(interp, "::nacl::info", Tnacl_Info, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+  Tcl_CreateObjCommand(interp, "::nacl::manifest", Tnacl_Manifest, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
   Tcl_PkgProvide(interp, PACKAGE_NAME, PACKAGE_VERSION);
   return TCL_OK;
 }
-
-#ifdef _WIN32
-DECLSPEC_EXPORT
-#endif
-int Nacl_SafeInit(Tcl_Interp *interp) {
-  return Nacl_Init(interp);
+#ifdef __cplusplus
 }
-
+#endif  /* __cplusplus */

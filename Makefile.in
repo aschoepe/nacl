@@ -44,7 +44,7 @@ PKG_STUB_OBJECTS = @PKG_STUB_OBJECTS@
 # this package that need to be installed, if any.
 #========================================================================
 
-PKG_TCL_SOURCES = @PKG_TCL_SOURCES@
+PKG_TCL_SOURCES = @PKG_TCL_SOURCES@ generic/manifest.h
 
 #========================================================================
 # This is a list of public header files to be installed, if any.
@@ -158,7 +158,7 @@ PKG_CFLAGS	= @PKG_CFLAGS@
 DEFS		= @DEFS@ $(PKG_CFLAGS)
 
 # Move pkgIndex.tcl to 'BINARIES' var if it is generated in the Makefile
-CONFIG_CLEAN_FILES = Makefile pkgIndex.tcl
+CONFIG_CLEAN_FILES = Makefile pkgIndex.tcl generic/manifest.h
 CLEANFILES	= @CLEANFILES@
 
 CPPFLAGS	= @CPPFLAGS@
@@ -181,7 +181,10 @@ COMPILE		= $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(C
 # for the BINARIES that you specified above have already been done.
 #========================================================================
 
-all: binaries libraries doc
+all: generic/manifest.h binaries libraries doc
+
+generic/manifest.h: manifest manifest.uuid tools/mkversion.tcl
+	$(TCLSH_PROG) tools/mkversion.tcl -defines > $@
 
 #========================================================================
 # The binaries target builds executable programs, Windows .dll's, unix
@@ -239,7 +242,7 @@ install-doc: doc
 test: binaries libraries
 	$(TCLSH) `@CYGPATH@ $(srcdir)/tests/all.tcl` $(TESTFLAGS) \
 		-load "package ifneeded ${PACKAGE_NAME} ${PACKAGE_VERSION} \
-			[list load `@CYGPATH@ $(PKG_LIB_FILE)` $(PACKAGE_NAME)]"
+			[list load `@CYGPATH@ $(PKG_LIB_FILE)` [string totitle ${PACKAGE_NAME} 0 0]]"
 
 shell: binaries libraries
 	@$(TCLSH) $(SCRIPT)
@@ -298,6 +301,9 @@ VPATH = $(srcdir):$(srcdir)/generic:$(srcdir)/unix:$(srcdir)/win:$(srcdir)/macos
 
 .c.@OBJEXT@:
 	$(COMPILE) -c `@CYGPATH@ $<` -o $@
+
+nacl.@OBJEXT@: $(srcdir)/generic/nacl.c generic/manifest.h
+	$(COMPILE) -c `@CYGPATH@ $(srcdir)/generic/nacl.c` -o $@
 
 #========================================================================
 # Distribution creation
@@ -443,7 +449,7 @@ uninstall-binaries:
 	  rm -f $(DESTDIR)$(bindir)/$$p; \
 	done
 
-.PHONY: all binaries clean depend distclean doc install libraries test
+.PHONY: all binaries clean depend distclean doc install libraries test generic/manifest.h
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

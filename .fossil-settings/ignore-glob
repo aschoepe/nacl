@@ -1,0 +1,10 @@
+*.o
+*.so
+*.dylib
+config.log
+config.status
+configure~
+Makefile
+pkgIndex.tcl
+autom4te.cache/*
+generic/manifest.h
