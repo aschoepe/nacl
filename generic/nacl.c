@@ -9,7 +9,7 @@
     Illinois at Chicago and Technische Universiteit Eindhoven), Tanja Lange (Technische
     Universiteit Eindhoven), and Peter Schwabe (Radboud Universiteit Nijmegen).
 
-    Copyright (C) 2016-2025 Alexander Schoepe, Bochum, DE, <alx.tcl@sowaswie.de>
+    Copyright (C) 2016-2026 Alexander Schoepe, Bochum, DE, <alx.tcl(at)sowaswie.de>
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without modification,
@@ -233,10 +233,6 @@
 */
 
 
-// For Tcl 8.6 up to any Tcl 9 version. Note that the upper bound 10 is exclusive.
-#define MY_TCL_INITSTUBS "8.6-10"
-// TWEETNACL_VERSION
-
 #ifdef _WIN32
 #include <windows.h>
 #ifndef DECLSPEC_EXPORT
@@ -260,8 +256,6 @@
 #define FALSE 0
 #define TRUE (!FALSE)
 #endif
-
-static char mTag[] = "@(#)nacl.c v" RELEASE_VERSION " " MANIFEST_VERSION " " MANIFEST_DATE " (BSD 3 License) Alexander Schoepe, Bochum, DE";
 
 /* Compatibility for Tcl 8.6 and 9.0 */
 #if TCL_MAJOR_VERSION < 9
@@ -2544,20 +2538,6 @@ static int Tnacl_Info (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_
   Tcl_ListObjAppendElement(interp, llObjPtr, Tcl_NewStringObj("All of the NaCl and TweetNaCl software is in the public domain.", -1));
   Tcl_ListObjAppendElement(interp, lObjPtr, llObjPtr);
 
-  Tcl_ListObjAppendElement(interp, lObjPtr, Tcl_NewStringObj("MANIFEST", -1));
-  Tcl_Obj *mlObjPtr = Tcl_NewListObj(0, NULL);
-  Tcl_ListObjAppendElement(interp, mlObjPtr, Tcl_NewStringObj("release", -1));
-  Tcl_ListObjAppendElement(interp, mlObjPtr, Tcl_NewStringObj(RELEASE_VERSION, -1));
-  Tcl_ListObjAppendElement(interp, mlObjPtr, Tcl_NewStringObj("check-in", -1));
-  Tcl_ListObjAppendElement(interp, mlObjPtr, Tcl_NewStringObj(MANIFEST_VERSION, -1));
-  Tcl_ListObjAppendElement(interp, mlObjPtr, Tcl_NewStringObj("date", -1));
-  Tcl_ListObjAppendElement(interp, mlObjPtr, Tcl_NewStringObj(MANIFEST_DATE, -1));
-  Tcl_ListObjAppendElement(interp, mlObjPtr, Tcl_NewStringObj("build", -1));
-  Tcl_ListObjAppendElement(interp, mlObjPtr, Tcl_NewStringObj(FOSSIL_BUILD_HASH, -1));
-  Tcl_ListObjAppendElement(interp, mlObjPtr, Tcl_NewStringObj("uuid", -1));
-  Tcl_ListObjAppendElement(interp, mlObjPtr, Tcl_NewStringObj(MANIFEST_UUID, -1));
-  Tcl_ListObjAppendElement(interp, lObjPtr, mlObjPtr);
-
   Tcl_ListObjAppendElement(interp, lObjPtr, Tcl_NewStringObj("crypto_box", -1));
   Tcl_ListObjAppendElement(interp, lObjPtr, Tcl_NewStringObj("crypto_box_curve25519xsalsa20poly1305", -1));
   Tcl_ListObjAppendElement(interp, lObjPtr, Tcl_NewStringObj("crypto_box_BOXZEROBYTES", -1));
@@ -2630,86 +2610,137 @@ static int Tnacl_Info (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_
   return TCL_OK;
 }
 
-
 /*
- * Build Info Command - command to return build info for package
+ *-----------------------------------------------------------------------------
+ *
+ * Tnacl_Manifest --
+ *
+ *  Returns build manifest information as a Tcl dictionary.
+ *
+ * Results:
+ *  A standard Tcl result.
+ *  Interp result is set to a dictionary containing manifest data.
+ *
+ *-----------------------------------------------------------------------------
  */
+
+static int
+Tnacl_Manifest(
+  ClientData dummy,
+  Tcl_Interp *interp,
+  int objc,
+  Tcl_Obj *const objv[])
+{
+  static const char  vTag[] __attribute__((used)) = "@(#)nacl.c v" RELEASE_VERSION " " MANIFEST_VERSION " " MANIFEST_DATE " (BSD 3 License) Alexander Schoepe, Bochum, DE";
+  (void)vTag;
+
+  if (objc != 1) {
+    Tcl_WrongNumArgs(interp, 1, objv, "");
+    return TCL_ERROR;
+  }
+
+  Tcl_Obj *dictPtr = Tcl_NewDictObj();
+
+  Tcl_DictObjPut(interp, dictPtr,
+    Tcl_NewStringObj("version", -1),
+    Tcl_NewStringObj(RELEASE_VERSION, -1));
+
+  Tcl_DictObjPut(interp, dictPtr,
+    Tcl_NewStringObj("date", -1),
+    Tcl_NewStringObj(MANIFEST_DATE, -1));
+
+  Tcl_DictObjPut(interp, dictPtr,
+    Tcl_NewStringObj("check-in", -1),
+    Tcl_NewStringObj(MANIFEST_VERSION, -1));
+
+  Tcl_DictObjPut(interp, dictPtr,
+    Tcl_NewStringObj("build-hash", -1),
+    Tcl_NewStringObj(FOSSIL_BUILD_HASH, -1));
+
+  Tcl_DictObjPut(interp, dictPtr,
+    Tcl_NewStringObj("uuid", -1),
+    Tcl_NewStringObj(MANIFEST_UUID, -1));
+
+  Tcl_SetObjResult(interp, dictPtr);
+  return TCL_OK;
+}
+
 
 #ifndef STRINGIFY
 #  define STRINGIFY(x) STRINGIFY1(x)
 #  define STRINGIFY1(x) #x
 #endif
 
-int BuildInfoCommand(Tcl_Interp* interp)	{
+#ifdef __cplusplus
+extern "C" {
+#endif  /* __cplusplus */
+DLLEXPORT int
+Nacl_Init(
+  Tcl_Interp* interp)		/* Tcl interpreter */
+{
   Tcl_CmdInfo info;
+  // Support any Tcl version from 8.6.0 to 9.x.x, the upper bound is exclusiv.
+  if (Tcl_InitStubs(interp, "8.6-10", 0) == NULL) {
+    return TCL_ERROR;
+  }
 
-if (Tcl_GetCommandInfo(interp, "::tcl::build-info", &info)) {
-    Tcl_CreateObjCommand(interp, "::nacl::build-info", info.objProc, (void *)(PACKAGE_VERSION "+" MANIFEST_UUID
+  // Build Info Command - command to return build info for package
+  if (Tcl_GetCommandInfo(interp, "::tcl::build-info", &info)) {
+    Tcl_CreateObjCommand(interp, "::nacl::build-info",
+      info.objProc, (void *)(
+		    PACKAGE_VERSION "+" STRINGIFY(MANIFEST_UUID)
 #if defined(__clang__) && defined(__clang_major__)
-      ".clang-" STRINGIFY(__clang_major__)
+			    ".clang-" STRINGIFY(__clang_major__)
 #if __clang_minor__ < 10
-      "0"
+			    "0"
 #endif
-      STRINGIFY(__clang_minor__)
+			    STRINGIFY(__clang_minor__)
 #endif
 #if defined(__cplusplus) && !defined(__OBJC__)
-      ".cplusplus"
+			    ".cplusplus"
 #endif
 #ifndef NDEBUG
-      ".debug"
+			    ".debug"
 #endif
 #if !defined(__clang__) && !defined(__INTEL_COMPILER) && defined(__GNUC__)
-      ".gcc-" STRINGIFY(__GNUC__)
+			    ".gcc-" STRINGIFY(__GNUC__)
 #if __GNUC_MINOR__ < 10
-      "0"
+			    "0"
 #endif
-      STRINGIFY(__GNUC_MINOR__)
+			    STRINGIFY(__GNUC_MINOR__)
 #endif
 #ifdef __INTEL_COMPILER
-      ".icc-" STRINGIFY(__INTEL_COMPILER)
+			    ".icc-" STRINGIFY(__INTEL_COMPILER)
 #endif
 #ifdef TCL_MEM_DEBUG
-      ".memdebug"
+			    ".memdebug"
 #endif
 #if defined(_MSC_VER)
-      ".msvc-" STRINGIFY(_MSC_VER)
+			    ".msvc-" STRINGIFY(_MSC_VER)
 #endif
 #ifdef USE_NMAKE
-      ".nmake"
+			    ".nmake"
 #endif
 #ifndef TCL_CFG_OPTIMIZED
-      ".no-optimize"
+			    ".no-optimize"
 #endif
 #ifdef __OBJC__
-      ".objective-c"
+			    ".objective-c"
 #if defined(__cplusplus)
-      "plusplus"
+			    "plusplus"
 #endif
 #endif
 #ifdef TCL_CFG_PROFILED
-      ".profile"
+			    ".profile"
 #endif
 #ifdef PURIFY
-      ".purify"
+			    ".purify"
 #endif
 #ifdef STATIC_BUILD
-      ".static"
+			    ".static"
 #endif
 		), NULL);
   }
-  return TCL_OK;
-}
-
-
-#ifdef _WIN32
-DECLSPEC_EXPORT
-#endif
-int Nacl_Init(Tcl_Interp *interp) {
-#ifdef USE_TCL_STUBS
-  if (Tcl_InitStubs(interp, MY_TCL_INITSTUBS, 0) == NULL) {
-    return TCL_ERROR;
-  }
-#endif
 
   Tcl_CreateObjCommand(interp, "::nacl::randombytes", Tnacl_RandomBytes, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
@@ -2729,18 +2760,11 @@ int Nacl_Init(Tcl_Interp *interp) {
 
   // information functions
   Tcl_CreateObjCommand(interp, "::nacl::info", Tnacl_Info, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-
-  // build info
-  BuildInfoCommand(interp);
+  Tcl_CreateObjCommand(interp, "::nacl::manifest", Tnacl_Manifest, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
   Tcl_PkgProvide(interp, PACKAGE_NAME, PACKAGE_VERSION);
   return TCL_OK;
 }
-
-#ifdef _WIN32
-DECLSPEC_EXPORT
-#endif
-int Nacl_SafeInit(Tcl_Interp *interp) {
-  return Nacl_Init(interp);
+#ifdef __cplusplus
 }
-
+#endif  /* __cplusplus */

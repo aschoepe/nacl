@@ -7,6 +7,17 @@ exec tclsh "$0" "$@"
 # mkversion.c from fossil-scm ported to vanilla tcl
 #
 
+set manifest {}
+set optDefines 0
+set optPkgName 0
+set pkgName {}
+
+
+# Note:
+# fossil GUI Settings Manifest = on.
+# If necessary, the fossil clone setting 'fossil settings manifest --value' must be checked
+# and set correctly using 'fossil settings manifest on'.
+
 proc hash {zIn N} {
   set zL {}
   foreach c [split $zIn {}] {
@@ -49,13 +60,11 @@ proc hash {zIn N} {
   return $zOut
 }
 
-set manifest {}
-
 if {![catch {open manifest.uuid r} fd]} {
   if {![eof $fd]} {
     if {[gets $fd uuid] > 0} {
       lappend manifest MANIFEST_UUID $uuid
-      lappend manifest MANIFEST_VERSION [format {[%10.10s]} $uuid]
+      lappend manifest MANIFEST_VERSION [format {%10.10s} $uuid]
       if {[info exists ::env(SOURCE_DATE_EPOCH)] && [string is wideinteger $::env(SOURCE_DATE_EPOCH)]} {
         set ctime $::env(SOURCE_DATE_EPOCH)
       } else {
@@ -92,7 +101,8 @@ if {![catch {open configure.ac r} fd]} {
   while {![eof $fd]} {
     if {[gets $fd line] > 0} {
       if {[string match {AC_INIT*} $line]} {
-	if {[regexp {AC_INIT\(\[[^\]]*\]\s*,\s*\[(.*?)\]\)} $line match version]} {
+	if {[regexp {AC_INIT\(\[([^\]]*)\]\s*,\s*\[(.*?)\]\)} $line match name version]} {
+	  set pkgName [string toupper $name]
 	  set versionList [lrange [split $version.0.0.0 .] 0 3]
 	  lappend manifest RELEASE_VERSION $version
 	  lappend manifest RELEASE_VERSION_NUMBER [format {%d%02d%d%d} {*}$versionList]
@@ -162,15 +172,34 @@ package provide 1.0
 set ::pkgname::pkgPath [file dirname [info script]]
 }
 
-if {$argv eq {-defines}} {
+foreach arg $argv {
+  switch -exact -- $arg {
+    -defines {
+      set optDefines 1
+    }
+    -name {
+      set optPkgName 1
+    }
+  }
+}
+
+if {$optDefines} {
   foreach {n v} $manifest {
     if {$n ni {MANIFEST_NUMERIC_DATE MANIFEST_NUMERIC_TIME RELEASE_VERSION_NUMBER RELEASE_RESOURCE_VERSION}} {
       set v "\"$v\""
     }
-    puts "#define $n $v"
+    if {$optPkgName && $pkgName ne {}} {
+      puts "#define ${pkgName}_${n} $v"
+    } else {
+      puts "#define $n $v"
+    }
   }
 } else {
   foreach {n v} $manifest {
-    puts [list $n $v]
+    if {$optPkgName && $pkgName ne {}} {
+      puts [list ${pkgName}_${n} $v]
+    } else {
+      puts [list $n $v]
+    }
   }
 }

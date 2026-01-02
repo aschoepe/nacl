@@ -151,21 +151,13 @@ TEA_CONFIG_CFLAGS
 TEA_ENABLE_SYMBOLS
 
 #--------------------------------------------------------------------
+# Custom macros defined in aclocal.m4.
+#--------------------------------------------------------------------
 
 CHECK_FOR_RANDOM_DEVICES
 CHECK_FOR_SECRANDOMCOPYBYTES
 CHECK_FOR_GETRANDOM
 CHECK_FOR_CRYPTGENRANDOM
-
-#--------------------------------------------------------------------
-# Everyone should be linking against the Tcl stub library.  If you
-# can't for some reason, remove this definition.  If you aren't using
-# stubs, you also need to modify the SHLIB_LD_LIBS setting below to
-# link against the non-stubbed Tcl library.  Add Tk too if necessary.
-#--------------------------------------------------------------------
-
-AC_DEFINE(USE_TCL_STUBS, 1, [Use Tcl stubs])
-#AC_DEFINE(USE_TK_STUBS, 1, [Use Tk stubs])
 
 #--------------------------------------------------------------------
 # This macro generates a line to use when building a library.  It

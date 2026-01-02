@@ -5442,8 +5442,6 @@ printf "%s\n" "$ac_cv_c_bigendian" >&6; }
 # and PKG_TCL_SOURCES.
 #-----------------------------------------------------------------------
 
-printf "%s\n" "#define NO_PNG 1" >>confdefs.h
-
 printf "%s\n" "#define TWEETNACL_VERSION \"20140427\"" >>confdefs.h
 
 
@@ -8823,6 +8821,7 @@ printf "%s\n" "enabled $tcl_ok debugging" >&6; }
 
 
 #--------------------------------------------------------------------
+# Custom macros defined in aclocal.m4.
 #--------------------------------------------------------------------
 
 
@@ -8917,18 +8916,6 @@ fi
     #Advapi32.lib
   fi
 
-
-#--------------------------------------------------------------------
-# Everyone should be linking against the Tcl stub library.  If you
-# can't for some reason, remove this definition.  If you aren't using
-# stubs, you also need to modify the SHLIB_LD_LIBS setting below to
-# link against the non-stubbed Tcl library.  Add Tk too if necessary.
-#--------------------------------------------------------------------
-
-
-printf "%s\n" "#define USE_TCL_STUBS 1" >>confdefs.h
-
-#AC_DEFINE(USE_TK_STUBS, 1, [Use Tk stubs])
 
 #--------------------------------------------------------------------
 # This macro generates a line to use when building a library.  It
@@ -9302,12 +9289,26 @@ printf "%s\n" "${TCLSH_PROG}" >&6; }
 #TEA_PROG_WISH
 
 #--------------------------------------------------------------------
-# Finally, substitute all of the various values into the Makefile.
-# You may alternatively have a special pkgIndex.tcl.in or other files
-# which require substituting th AC variables in.  Include these here.
+# Setup a *Config.sh.in configuration file.
+#--------------------------------------------------------------------
+
+#TEA_EXPORT_CONFIG([sample])
+#AC_SUBST(SAMPLE_VAR)
+
+#--------------------------------------------------------------------
+# Specify files to substitute AC variables in. You may alternatively
+# have a special pkgIndex.tcl.in or other files which require
+# substituting the AC variables in. Include these here.
 #--------------------------------------------------------------------
 
 ac_config_files="$ac_config_files Makefile pkgIndex.tcl"
+
+#AC_CONFIG_FILES([sampleConfig.sh])
+
+#--------------------------------------------------------------------
+# Finally, substitute all of the various values into the files
+# specified with AC_CONFIG_FILES.
+#--------------------------------------------------------------------
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
