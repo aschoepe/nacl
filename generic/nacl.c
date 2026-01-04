@@ -252,23 +252,10 @@
 #include "randombytes.h"
 #include "manifest.h"
 
+
 #ifndef FALSE
 #define FALSE 0
 #define TRUE (!FALSE)
-#endif
-
-/* Compatibility for Tcl 8.6 and 9.0 */
-#if TCL_MAJOR_VERSION < 9
-#   ifndef Tcl_Size
-    typedef int Tcl_Size;
-#   endif
-#   define Tcl_GetSizeIntFromObj Tcl_GetIntFromObj
-#   ifndef TCL_SIZE_MAX
-#   define TCL_SIZE_MAX INT_MAX
-#   endif
-#   ifndef TCL_SIZE_MODIFIER
-#   define TCL_SIZE_MODIFIER ""
-#   endif
 #endif
 
 /*
