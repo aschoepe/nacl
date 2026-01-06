@@ -270,7 +270,7 @@
    nacl::randombytes onetimeauth ?-key?
 */
 
-static int Tnacl_RandomBytes(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+static int Tnacl_RandomBytes(void * clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   static const char *const command[] = {
     "names", "source",
     "box", "scalarmult", "secretbox", "stream", "auth", "onetimeauth",
@@ -711,7 +711,7 @@ static int Tnacl_RandomBytes(ClientData clientData, Tcl_Interp *interp, int objc
     nacl::box open messageVariable cipherValue nonceValue publicKeyValue secretKeyValue
   */
 
-static int Tnacl_Box (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+static int Tnacl_Box (void * clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   static const char *const command[] = {
     "info", "keypair", "open", NULL
   };
@@ -1022,7 +1022,7 @@ static int Tnacl_Box (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_O
    nacl::scalarmult -base resultVariable scalarValue
    */
 
-static int Tnacl_ScalarMult(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+static int Tnacl_ScalarMult(void * clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   static const char *const command[] = {
     "info", "base", NULL
   };
@@ -1237,7 +1237,7 @@ static int Tnacl_ScalarMult(ClientData clientData, Tcl_Interp *interp, int objc,
    nacl::sign verify messageVariable signedValue publicKeyValue
  */
 
-static int Tnacl_Sign (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+static int Tnacl_Sign (void * clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   static const char *const command[] = {
     "info", "keypair", "verify", NULL
   };
@@ -1508,7 +1508,7 @@ static int Tnacl_Sign (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_
    nacl::secretbox open messageVariable cipherValue nonceValue keyValue
  */
 
-static int Tnacl_SecretBox (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+static int Tnacl_SecretBox (void * clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   static const char *const command[] = {
     "info", "open", NULL
   };
@@ -1774,7 +1774,7 @@ static int Tnacl_SecretBox (ClientData clientData, Tcl_Interp *interp, int objc,
    nacl::stream cipherVariable messageValue nonceValue keyValue
  */
 
-static int Tnacl_Stream (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+static int Tnacl_Stream (void * clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   static const char *const command[] = {
     "info", "generate", NULL
   };
@@ -1986,7 +1986,7 @@ static int Tnacl_Stream (ClientData clientData, Tcl_Interp *interp, int objc, Tc
    nacl::auth verify -hmac256|-hmac512256 authValue messageValue keyValue
  */
 
-static int Tnacl_Auth(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+static int Tnacl_Auth(void * clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   static const char *const command[] = {
     "info", "verify", NULL
   };
@@ -2199,7 +2199,7 @@ static int Tnacl_Auth(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_O
    nacl::onetimeauth verify authValue messageValue keyValue
  */
 
-static int Tnacl_OneTimeAuth(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+static int Tnacl_OneTimeAuth(void * clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   static const char *const command[] = {
     "info", "verify", NULL
   };
@@ -2367,7 +2367,7 @@ static int Tnacl_OneTimeAuth(ClientData clientData, Tcl_Interp *interp, int objc
    nacl::hash ?-sha256|-sha512? hashVariable messageValue
 */
 
-static int Tnacl_Hash(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+static int Tnacl_Hash(void * clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   Tcl_Obj *hObjPtr;
   unsigned char *h, *m;
   int rc = -1;
@@ -2499,7 +2499,7 @@ static int Tnacl_Hash(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_O
 // Not implemented for calling from Tcl
 
 
-static int Tnacl_Info (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
+static int Tnacl_Info (void * clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   Tcl_SetObjResult(interp, Tcl_NewStringObj(TWEETNACL_VERSION, -1));
   Tcl_Obj *lObjPtr = Tcl_NewListObj(0, NULL);
 
@@ -2613,7 +2613,7 @@ static int Tnacl_Info (ClientData clientData, Tcl_Interp *interp, int objc, Tcl_
 
 static int
 Tnacl_Manifest(
-  ClientData dummy,
+  void * dummy,
   Tcl_Interp *interp,
   int objc,
   Tcl_Obj *const objv[])
@@ -2729,25 +2729,25 @@ Nacl_Init(
 		), NULL);
   }
 
-  Tcl_CreateObjCommand(interp, "::nacl::randombytes", Tnacl_RandomBytes, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+  Tcl_CreateObjCommand(interp, "::nacl::randombytes", Tnacl_RandomBytes, (void *)NULL, (Tcl_CmdDeleteProc *)NULL);
 
   // public-key cryptography
-  Tcl_CreateObjCommand(interp, "::nacl::box", Tnacl_Box, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-  Tcl_CreateObjCommand(interp, "::nacl::scalarmult", Tnacl_ScalarMult, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-  Tcl_CreateObjCommand(interp, "::nacl::sign", Tnacl_Sign, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+  Tcl_CreateObjCommand(interp, "::nacl::box", Tnacl_Box, (void *)NULL, (Tcl_CmdDeleteProc *)NULL);
+  Tcl_CreateObjCommand(interp, "::nacl::scalarmult", Tnacl_ScalarMult, (void *)NULL, (Tcl_CmdDeleteProc *)NULL);
+  Tcl_CreateObjCommand(interp, "::nacl::sign", Tnacl_Sign, (void *)NULL, (Tcl_CmdDeleteProc *)NULL);
 
   // secret-key cryptography
-  Tcl_CreateObjCommand(interp, "::nacl::secretbox", Tnacl_SecretBox, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-  Tcl_CreateObjCommand(interp, "::nacl::stream", Tnacl_Stream, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-  Tcl_CreateObjCommand(interp, "::nacl::auth", Tnacl_Auth, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-  Tcl_CreateObjCommand(interp, "::nacl::onetimeauth", Tnacl_OneTimeAuth, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+  Tcl_CreateObjCommand(interp, "::nacl::secretbox", Tnacl_SecretBox, (void *)NULL, (Tcl_CmdDeleteProc *)NULL);
+  Tcl_CreateObjCommand(interp, "::nacl::stream", Tnacl_Stream, (void *)NULL, (Tcl_CmdDeleteProc *)NULL);
+  Tcl_CreateObjCommand(interp, "::nacl::auth", Tnacl_Auth, (void *)NULL, (Tcl_CmdDeleteProc *)NULL);
+  Tcl_CreateObjCommand(interp, "::nacl::onetimeauth", Tnacl_OneTimeAuth, (void *)NULL, (Tcl_CmdDeleteProc *)NULL);
 
   // low-level functions
-  Tcl_CreateObjCommand(interp, "::nacl::hash", Tnacl_Hash, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+  Tcl_CreateObjCommand(interp, "::nacl::hash", Tnacl_Hash, (void *)NULL, (Tcl_CmdDeleteProc *)NULL);
 
   // information functions
-  Tcl_CreateObjCommand(interp, "::nacl::info", Tnacl_Info, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
-  Tcl_CreateObjCommand(interp, "::nacl::manifest", Tnacl_Manifest, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
+  Tcl_CreateObjCommand(interp, "::nacl::info", Tnacl_Info, (void *)NULL, (Tcl_CmdDeleteProc *)NULL);
+  Tcl_CreateObjCommand(interp, "::nacl::manifest", Tnacl_Manifest, (void *)NULL, (Tcl_CmdDeleteProc *)NULL);
 
   Tcl_PkgProvide(interp, PACKAGE_NAME, PACKAGE_VERSION);
   return TCL_OK;
