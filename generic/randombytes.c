@@ -26,7 +26,19 @@
 #endif
 
 #ifdef HAVE_GETRANDOM
+/*
+ * getrandom() itself is declared in <sys/random.h> (glibc 2.25 and newer),
+ * while <linux/random.h> only carries the GRND_* flags. Including just the
+ * latter leaves the function implicitly declared, which is an error rather
+ * than a warning as soon as the compiler defaults to C23.
+ */
+#ifdef HAVE_SYS_RANDOM_H
+#include <sys/random.h>
+#endif
+#ifdef HAVE_LINUX_RANDOM_H
 #include <linux/random.h>
+#endif
+#include <errno.h>
 #endif
 
 #ifdef HAVE_CRYPTGENRANDOM
@@ -70,7 +82,25 @@ int rb_SecRandomCopyBytes (void *buffer, int length) {
 
 #ifdef HAVE_GETRANDOM
 int rb_GetRandom (unsigned char *ptr, unsigned long long length) {
-   return (getrandom(ptr, length, GRND_RANDOM))? 0 : -1;
+  ssize_t i;
+
+  while (length > 0) {
+    /*
+     * With GRND_RANDOM the kernel hands out at most 512 bytes per call, and
+     * any call may be cut short by a signal, so one call is not enough. A
+     * negative result means failure: returning success there would leave the
+     * caller with an uninitialised buffer as key material.
+     */
+    i = getrandom(ptr, (length > 512)? 512 : (size_t)length, GRND_RANDOM);
+    if (i < 0) {
+      if (errno == EINTR)
+	continue;
+      return -1;
+    }
+    ptr += i;
+    length -= (unsigned long long)i;
+  }
+  return 0;
 }
 #endif
 

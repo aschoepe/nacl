@@ -49,6 +49,7 @@ AC_DEFUN(CHECK_FOR_SECRANDOMCOPYBYTES, [
 
 AC_DEFUN(CHECK_FOR_GETRANDOM, [
   if test "${TEA_PLATFORM}" = "unix"; then
+    AC_CHECK_HEADERS(sys/random.h)
     AC_CHECK_HEADERS(linux/random.h)
     AC_CHECK_FUNCS(getrandom)
   fi
