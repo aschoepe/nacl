@@ -1,5 +1,5 @@
-C Cleanup\sMakefile.in\sand\snacl.c
-D 2026-01-04T23:00:29.708
+C Provide\sa\sfallback\sfor\snacl::build-info\swhen\sTcl\sdoes\snot\ssupply\stcl::build-info\n\n-\sRegister\s::nacl::build-info\sunconditionally\s-\sit\sused\sto\sbe\screated\sonly\swhen\sTcl_GetCommandInfo\sfound\s::tcl::build-info,\sso\son\san\sinterpreter\slacking\sthat\scommand,\sTcl\s8.6\samong\sthem,\snacl::build-info\sdid\snot\sexist\sat\sall\n-\sAdd\sthe\sstatic\sTnacl_BuildInfo\sas\sthat\sfallback\s-\sit\sparses\sthe\sbuild\sinfo\sstring\shanded\sover\sas\sclient\sdata\sand\sis\sinstalled\swhenever\s::tcl::build-info\sis\sabsent,\swhile\sTcl's\sown\sobjProc\sis\sstill\sreused\swhen\sit\sis\spresent\n-\sSupport\sthe\ssubcommands\sversion,\spatchlevel,\scommit\sand\scompiler\s-\sversion\sreturns\smajor.minor\swhile\spatchlevel\sreturns\sthe\sfull\spackage\sversion,\scommit\sreturns\sthe\suuid\sbetween\sthe\splus\ssign\sand\sthe\sfollowing\sdot,\sand\scompiler\sreports\sthe\s.clang-\s.gcc-\s.msvc-\sor\s.icc-\smarker\sup\sto\sthe\snext\sdot\n-\sReturn\sthe\swhole\sbuild\sinfo\sstring\swhen\scalled\swithout\sa\ssubcommand,\sreport\san\sunknown\soption\sas\san\serror\snaming\sthe\svalid\sones,\sand\sreject\sa\ssurplus\sargument\sthrough\sTcl_WrongNumArgs\n-\sConcatenate\sMANIFEST_UUID\sdirectly\sinstead\sof\spassing\sit\sthrough\sSTRINGIFY\s-\sthe\smacro\salready\sexpands\sto\sa\squoted\sstring,\sso\sstringifying\sit\sa\ssecond\stime\sembedded\sliteral\squotes\sinto\sthe\scommit\sfield\n-\sClamp\seach\sfield\scopied\sinto\sthe\slocal\s128\sbyte\sbuffer\sto\sits\ssize\sso\sthat\smemcpy\sstays\sin\sbounds
+D 2026-07-31T12:22:55.128
 F .fossil-settings/ignore-glob e120dce0c786cd8d9b96b382c906efec9181ab6d2f8a93b7430950a7402b6f40
 F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
 F LICENSE.nacl a11e84ee203968974e6341fa8315006a1e2cb14a4f91a216f234c787b79f7230
@@ -21,7 +21,7 @@ F generic/crypto_auth_hmacsha512256.c 95435d998c8de59f3d537af660c609155c2130a51b
 F generic/crypto_hash_sha256.c cb99e51b557432ed185144a9b6f2160a206158c809bb977968ab92744c1618f5
 F generic/crypto_hashblocks_sha256.c 71f663c3d8ad51b186997902c32a1869abb616d1cc8625f75d68a92021155125
 F generic/crypto_reference.h f360b7fb68d1fd61c71eeaa6ab7562d9d6faeacdf8ec05f4787a9baf5b308275
-F generic/nacl.c 07998cd971e0af39a064f8334c890bdfa0f7eb2f2bf21fe0fc2f881e5b88dac3 x
+F generic/nacl.c 0be9686f2a42fe258a7332b3d613e0c862e5902c2b86a25340a85321b2ffb981 x
 F generic/randombytes.c 73ee98ff51e5745fd7a350de8a9375fb8a64b5055f584771e28dff4323e448bf
 F generic/randombytes.h af7f7b0d4074e7f371ac725511c51361a1113f98536b8396df4959329b8c5dc1
 F generic/tweetnacl.c ce64213575c9d7e1547b6c170824c3a8eaa2948c9bca9b1f87c9beedb0ef4137
@@ -51,8 +51,8 @@ F win/nmakehlp.c 190bf8b40f6f90eeb6cbc1e5c13a19fc7ad870e479e0314c88174f71bf9e28a
 F win/rules-ext.vc 566230fdd999a957c27007ebfa8022aa523bdb64243d8efcdad1c9c8fc3cdae7
 F win/rules.vc 6eeb14ea0b8c551b93a1d3721a7474819e966b65a208523ab8eb1593c565e226
 F win/targets.vc 96a25a1fa6e9e9cfb348fd3760a5395b4ce8acafc8ed10f0412937ec200d5dbd
-P 26de0b5523482a8924e4d93b64a75c18c6005118b9739f3965a92123a81831bf
-R 298dcbf0c2b6de825b4f89893b640927
+P c570ff228be8f57089a8432c34531473c72b659a00ef77328d7ff2f8dfe90946
+R c69b6bf81ae3c4d867bba238244c2acc
 U alex
-Z 7156b51622237a807dfb02346501f1cc
+Z df146c7c0c5fd011c8fe69b81d159267
 # Remove this line to create a well-formed Fossil manifest.

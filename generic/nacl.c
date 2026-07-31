@@ -2652,6 +2652,99 @@ Tnacl_Manifest(
   return TCL_OK;
 }
 
+static int
+Tnacl_BuildInfo(
+  void *clientData,
+  Tcl_Interp *interp,
+  int objc,
+  Tcl_Obj *const objv[])
+{
+  const char *buildInfo = (const char *)clientData;
+  const char *p, *end;
+  char buf[128];
+  Tcl_Size len;
+
+  if (objc > 2) {
+    Tcl_WrongNumArgs(interp, 1, objv, "?option?");
+    return TCL_ERROR;
+  }
+
+  if (objc == 1) {
+    Tcl_SetObjResult(interp, Tcl_NewStringObj(buildInfo, -1));
+    return TCL_OK;
+  }
+
+  /* Parse subcommand: version, patchlevel, commit, compiler */
+  const char *option = Tcl_GetStringFromObj(objv[1], &len);
+
+  if (strcmp(option, "version") == 0 || strcmp(option, "patchlevel") == 0) {
+    /* Extract version: everything before '+' */
+    p = strchr(buildInfo, '+');
+    len = p ? (Tcl_Size)(p - buildInfo) : (Tcl_Size)strlen(buildInfo);
+    if (len > sizeof(buf) - 1) len = sizeof(buf) - 1;
+    memcpy(buf, buildInfo, len);
+    buf[len] = '\0';
+    if (strcmp(option, "version") == 0) {
+      /* version is major.minor only, patchlevel keeps the full string */
+      end = strchr(buf, '.');
+      if (end) {
+        end = strchr(end + 1, '.');
+        if (end) {
+          len = end - buf;
+          buf[len] = '\0';
+        }
+      }
+    }
+    Tcl_SetObjResult(interp, Tcl_NewStringObj(buf, len));
+  } else if (strcmp(option, "commit") == 0) {
+    /* Extract commit: uuid between '+' and the following '.' */
+    p = strchr(buildInfo, '+');
+    if (p) {
+      p++; /* skip '+' */
+      end = strchr(p, '.');
+      if (end) {
+        len = end - p;
+        if (len > sizeof(buf) - 1) len = sizeof(buf) - 1;
+        memcpy(buf, p, len);
+        buf[len] = '\0';
+        Tcl_SetObjResult(interp, Tcl_NewStringObj(buf, len));
+      } else {
+        Tcl_SetObjResult(interp, Tcl_NewStringObj(p, -1));
+      }
+    } else {
+      Tcl_SetObjResult(interp, Tcl_NewStringObj("", 0));
+    }
+  } else if (strcmp(option, "compiler") == 0) {
+    /* Extract compiler: .clang-XXXX, .gcc-XXXX, .msvc-XXXX, .icc-XXXX */
+    p = strstr(buildInfo, ".clang-");
+    if (!p) p = strstr(buildInfo, ".gcc-");
+    if (!p) p = strstr(buildInfo, ".msvc-");
+    if (!p) p = strstr(buildInfo, ".icc-");
+    if (p) {
+      p++; /* skip leading '.' */
+      end = strchr(p, '.');
+      if (end) {
+        len = end - p;
+      } else {
+        len = strlen(p);
+      }
+      if (len > sizeof(buf) - 1) len = sizeof(buf) - 1;
+      memcpy(buf, p, len);
+      buf[len] = '\0';
+      Tcl_SetObjResult(interp, Tcl_NewStringObj(buf, len));
+    } else {
+      Tcl_SetObjResult(interp, Tcl_NewStringObj("", 0));
+    }
+  } else {
+    Tcl_SetObjResult(interp, Tcl_ObjPrintf(
+      "bad option \"%s\": must be version, patchlevel, commit, or compiler",
+      option));
+    return TCL_ERROR;
+  }
+
+  return TCL_OK;
+}
+
 
 #ifndef STRINGIFY
 #  define STRINGIFY(x) STRINGIFY1(x)
@@ -2672,10 +2765,11 @@ Nacl_Init(
   }
 
   // Build Info Command - command to return build info for package
-  if (Tcl_GetCommandInfo(interp, "::tcl::build-info", &info)) {
-    Tcl_CreateObjCommand(interp, "::nacl::build-info",
-      info.objProc, (void *)(
-		    PACKAGE_VERSION "+" STRINGIFY(MANIFEST_UUID)
+  Tcl_CreateObjCommand(interp, "::nacl::build-info",
+    Tcl_GetCommandInfo(interp, "::tcl::build-info", &info)
+      ? info.objProc : Tnacl_BuildInfo,
+    (void *)(
+		    PACKAGE_VERSION "+" MANIFEST_UUID
 #if defined(__clang__) && defined(__clang_major__)
 			    ".clang-" STRINGIFY(__clang_major__)
 #if __clang_minor__ < 10
@@ -2727,7 +2821,6 @@ Nacl_Init(
 			    ".static"
 #endif
 		), NULL);
-  }
 
   Tcl_CreateObjCommand(interp, "::nacl::randombytes", Tnacl_RandomBytes, (ClientData)NULL, (Tcl_CmdDeleteProc *)NULL);
 
