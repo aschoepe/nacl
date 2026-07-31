@@ -1,5 +1,5 @@
-C Merge\sbranch\smodern,\sreplacing\sClientData\swith\svoid*\sthroughout\n\n-\sIntegrate\sthe\sbranch\smodern,\swhose\ssingle\scheck-in\sswaps\sClientData\sfor\svoid*\sin\sthe\sten\scommand\shandlers\sand\sin\sthe\seleven\sclient\sdata\scasts\sof\sTcl_CreateObjCommand\n-\sSettle\sthe\smixed\sstyle\sthat\shad\scrept\sin:\sTnacl_BuildInfo\swas\salready\sdeclared\swith\svoid*\swhile\severy\solder\shandler\sstill\sused\sClientData,\sso\snacl.c\sspelled\sthe\ssame\sthing\stwo\sways\n-\sNote\sthat\sthis\sis\sa\smatter\sof\sspelling\srather\sthan\sof\scompatibility\s-\stcl.h\sdeclares\sClientData\sas\sa\splain\stypedef\sof\svoid*\sin\s8.6\sas\swell\sas\sin\s9.0,\swith\sno\sdeprecation\sguard\saround\sit,\sso\sneither\sform\sbreaks\sanywhere\n-\sClose\sthe\sbranch\sthrough\sthe\sintegrate\sflag,\ssince\sit\shad\sbeen\ssitting\sunmerged\ssince\sjanuary\swhile\strunk\smoved\son\ssix\scheck-ins,\sand\sa\slonger\sdivergence\sonly\smakes\sthe\smerge\sharder
-D 2026-07-31T13:29:47.728
+C Follow\sthe\sversion\sbump\sup\sin\sthe\snacl-tcl\sskill\n\n-\sName\sthe\sbuilt\sartifact\sas\slibtcl9nacl1.3.dylib\sin\sboth\splaces\swhere\sthe\sskill\srefers\sto\sit,\sin\sthe\sloading\snote\sat\sthe\stop\sand\sin\sthe\sreference\slist\sat\sthe\send\n-\sRead\s1.3\sin\sthe\ssample\soutput\sof\snacl::build-info,\sand\sput\sa\splaceholder\sin\sthe\sposition\sof\sthe\scheck-in\suuid\sinstead\sof\sa\sliteral\sone,\swhich\swould\sgo\sstale\swith\sthe\snext\scommit\sanyway
+D 2026-07-31T13:39:46.306
 F .fossil-settings/ignore-glob 4176a3e7e71f37ea1756a38bc444d4c5044c809cdc326bc5f0137b07a34748af
 F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
 F LICENSE.nacl a11e84ee203968974e6341fa8315006a1e2cb14a4f91a216f234c787b79f7230
@@ -7,7 +7,7 @@ F LICENSE.terms 8bb94bd557d785c1c7a20282da941bfa6554597e8c2a8af8a33d9ef1b7dfaf86
 F Makefile.in dad887cd037310aac7772db20a66fad74fc12cfa7125cd5e1194518d49d190c6
 F README ddf841412c2d2da5c72b40a1288183adf10c14381307be1aa36803138dceb41e
 F aclocal.m4 42c43a1bd20d7f4febdf9e092b9433b54429b777f8e8c42bb89da8b77f3186ed
-F claude/nacl-tcl/SKILL.md e02fb101582472377b49b20fba88992b9e65475f3e571c730183ffee2ae0f093
+F claude/nacl-tcl/SKILL.md 52b061fd6f1862b77e2c876b22cb55d6834b3e9e3ff20cf06747ba3478fcaae0
 F claude/nacl-tcl/references/config-secrets.md 258987dd6a4cc1880c194eaa83b91b30ccf001cfd64bd959fa1b77c407c5106b
 F claude/nacl-tcl/references/jwt-hs256-test.tcl 4a64e26b020719c8cd8d4e7bfbf7f9d261987088e3003ac7660a94b3fe3d5955
 F claude/nacl-tcl/references/jwt-hs256.tcl 5cbb77861286cb2f8429b2b44cc2de1e0d32418a56c548e16c104fdd6483ebc1
@@ -57,9 +57,8 @@ F win/nmakehlp.c 190bf8b40f6f90eeb6cbc1e5c13a19fc7ad870e479e0314c88174f71bf9e28a
 F win/rules-ext.vc 566230fdd999a957c27007ebfa8022aa523bdb64243d8efcdad1c9c8fc3cdae7
 F win/rules.vc 6eeb14ea0b8c551b93a1d3721a7474819e966b65a208523ab8eb1593c565e226
 F win/targets.vc 96a25a1fa6e9e9cfb348fd3760a5395b4ce8acafc8ed10f0412937ec200d5dbd
-P bf1938890a5a5c6f656e9f4f99edafaa86bf483b7f660049b26aee27cf2e2915 444488e2c399e58b2b4d3f76c396dd5b2cff9149ce41138d5a8ab88f29f349bf
-R 510c038bac4fb11fa881729b7036b381
-T +closed 444488e2c399e58b2b4d3f76c396dd5b2cff9149ce41138d5a8ab88f29f349bf
+P d8ba755d29e7f0c8a9f4b82f4aec0a06ed91534cda827c3a7cc558310e4350f9
+R 23ea6397f2a4f898e1747a7b7175cb11
 U alex
-Z f183064bccc17d4ee4968e6e831b0382
+Z 53b50aa7eada4cab8a8e1008a423dce4
 # Remove this line to create a well-formed Fossil manifest.

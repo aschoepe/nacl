@@ -18,7 +18,7 @@ description: >
 > Long form / rationale: [references/config-secrets.md](references/config-secrets.md).
 
 Binding for **NaCl / TweetNaCl** primitives in Tcl. Built and installed from this
-repo (`libtcl9nacl1.2.dylib`, `pkgIndex.tcl`). Load with:
+repo (`libtcl9nacl1.3.dylib`, `pkgIndex.tcl`). Load with:
 
 ```tcl
 package require nacl
@@ -308,8 +308,8 @@ If unsure about a primitive's parameter sizes at runtime:
 ```tcl
 nacl::info                       ;# package + version metadata
 nacl::manifest                   ;# dict: version, date, check-in, build-hash, uuid
-nacl::build-info                 ;# "1.2+c570ff22...clang-1700"
-nacl::build-info version         ;# "1.2"    (patchlevel, commit, compiler likewise)
+nacl::build-info                 ;# "1.3+<check-in uuid>.clang-1700"
+nacl::build-info version         ;# "1.3"    (patchlevel, commit, compiler likewise)
 nacl::box info                   ;# "cipher+ 16 nonce 24 public-key 32 secret-key 32"
 nacl::secretbox info             ;# "cipher+ 16 nonce 24 key 32"
 nacl::sign info                  ;# "sign+ 64 public-key 32 secret-key 64"
@@ -323,7 +323,7 @@ nacl::scalarmult info            ;# "result 32 scalar 32 group 32"
 ## Reference
 
 - Source: the `nacl` TEA-compatible Tcl extension (build from its source tree)
-- Built artifact: `libtcl9nacl1.2.dylib` + `pkgIndex.tcl`
+- Built artifact: `libtcl9nacl1.3.dylib` + `pkgIndex.tcl`
 - Upstream NaCl docs: see `doc/coolnacl-20120725.pdf`,
   `doc/naclcrypto-20090310.pdf`, `doc/tweetnacl-20140917.pdf`
 - Command summary: `doc/help.txt`
