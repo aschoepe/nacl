@@ -1,5 +1,5 @@
-C Follow\sthe\sversion\sbump\sup\sin\sthe\snacl-tcl\sskill\n\n-\sName\sthe\sbuilt\sartifact\sas\slibtcl9nacl1.3.dylib\sin\sboth\splaces\swhere\sthe\sskill\srefers\sto\sit,\sin\sthe\sloading\snote\sat\sthe\stop\sand\sin\sthe\sreference\slist\sat\sthe\send\n-\sRead\s1.3\sin\sthe\ssample\soutput\sof\snacl::build-info,\sand\sput\sa\splaceholder\sin\sthe\sposition\sof\sthe\scheck-in\suuid\sinstead\sof\sa\sliteral\sone,\swhich\swould\sgo\sstale\swith\sthe\snext\scommit\sanyway
-D 2026-07-31T13:39:46.306
+C Version-1.3
+D 2026-07-31T13:40:51.727
 F .fossil-settings/ignore-glob 4176a3e7e71f37ea1756a38bc444d4c5044c809cdc326bc5f0137b07a34748af
 F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
 F LICENSE.nacl a11e84ee203968974e6341fa8315006a1e2cb14a4f91a216f234c787b79f7230
@@ -13,8 +13,8 @@ F claude/nacl-tcl/references/jwt-hs256-test.tcl 4a64e26b020719c8cd8d4e7bfbf7f9d2
 F claude/nacl-tcl/references/jwt-hs256.tcl 5cbb77861286cb2f8429b2b44cc2de1e0d32418a56c548e16c104fdd6483ebc1
 F claude/nacl-tcl/references/secretbox-store-test.tcl f664576c7139f3be05b0b6a38ee8d07392108cee2e5c9ebe8c0699224c002133
 F claude/nacl-tcl/references/secretbox-store.tcl 0e5692883fb2727a7565b6cca713804887fb953fc0cd7ae007dca498ba4ed1c7
-F configure d7f58df8084a3ae66206cf1f6f964b6c3e29186bc87d0c1445cdb212a161ce02 x
-F configure.ac 5810b3b3aa2c43e10de2892062fbd06977ee08e20c10e17a99f4f7807fb862a2
+F configure 8968ac8a7699b9337edf60c99a8547a8d0966a5dc639fbf3f90144cfb91b593a x
+F configure.ac 4e5932340051d07db024466e8c49e61649b035756176f6186571db1aa0a6a1e5
 F doc/coolnacl-20120725.pdf b5d29b0c3a3b22ee3014e393ad7458c4677493a5feb6ff7f0342bab6a06debcd
 F doc/examples.txt 9e02d753f6cbb89b184874bd90591bea9df8b86ce5039e7b0982c0d4783d36db
 F doc/help.txt fb5b881430cd895f3c54d820d9bd8c1a7260156682c8971dd341c44b553a9508
@@ -57,8 +57,11 @@ F win/nmakehlp.c 190bf8b40f6f90eeb6cbc1e5c13a19fc7ad870e479e0314c88174f71bf9e28a
 F win/rules-ext.vc 566230fdd999a957c27007ebfa8022aa523bdb64243d8efcdad1c9c8fc3cdae7
 F win/rules.vc 6eeb14ea0b8c551b93a1d3721a7474819e966b65a208523ab8eb1593c565e226
 F win/targets.vc 96a25a1fa6e9e9cfb348fd3760a5395b4ce8acafc8ed10f0412937ec200d5dbd
-P d8ba755d29e7f0c8a9f4b82f4aec0a06ed91534cda827c3a7cc558310e4350f9
-R 23ea6397f2a4f898e1747a7b7175cb11
+P 11c701b42e8c4d8720be1b9832fac5dd1ce735e094a5f3e7b0175e444b83a7dc
+R a0548e6d5f6b9863a4e5149cca7f5197
+T +bgcolor * #fea5f4
+T +sym-release *
+T +sym-version-1.3 *
 U alex
-Z 53b50aa7eada4cab8a8e1008a423dce4
+Z 7ffc960de06e75c89758a489765e8d7e
 # Remove this line to create a well-formed Fossil manifest.
