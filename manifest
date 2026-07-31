@@ -1,5 +1,5 @@
-C Correct\sthe\sinfo\soutput\sand\stwo\scommand\snames\sin\sdoc/help.txt\n\n-\sDrop\snonce\s24\sfrom\sthe\ssign\sinfo\sline\s-\sEd25519\ssignatures\shave\sno\snonce,\sand\snacl::sign\sinfo\shas\snever\sreported\sone\n-\sSpell\sthe\scommand\sof\sthe\scrypto_onetimeauth\ssection\sas\snacl::onetimeauth\sinfo,\swhere\sit\sread\snacl::info\sand\sthereby\snamed\sa\sdifferent\scommand\n-\sWrite\sthe\slength\sprefix\sas\scipher+\sand\ssign+\sthe\sway\sthe\scommands\sactually\sprint\sit,\srather\sthan\sas\scipher\s+16\sand\ssign\s+64\n-\sName\snacl::randombytes\sauth\s-key\sas\sthe\sgenerator\sof\sthe\s32\sbyte\skey,\ssince\sthe\snacl::random\s-auth\smentioned\sbefore\sdoes\snot\sexist
-D 2026-07-31T13:05:53.476
+C Add\sthe\snacl-tcl\sskill\sand\sits\sreference\smodules\n\n-\sAdd\sclaude/nacl-tcl/SKILL.md,\sa\sguide\sto\susing\sthe\spackage\sfrom\sTcl\s-\sthe\scalling\sconvention,\swhich\sprimitive\sto\spick\sfor\sa\sgiven\stask,\sa\srecipe\sper\scommand,\sthe\smistakes\sworth\scatching,\sand\sthe\sinfo,\smanifest\sand\sbuild-info\scommands\sfor\slooking\ssizes\sand\sversions\sup\sat\sruntime\n-\sAdd\sreferences/secretbox-store.tcl\swith\ssecretbox-store-test.tcl,\sa\sready\smade\smodule\skeeping\ssecrets\sat\srest\sas\sa\sself\sdescribing\senc:base64url\sblob\swith\sa\sfresh\snonce\sper\scall\n-\sAdd\sreferences/config-secrets.md\sas\sthe\srationale\sbehind\sthat\sstorage\spattern,\scovering\sthe\sdual\sread\smigration\sand\sthe\squestion\sof\swhere\sthe\skey\sitself\slives\n-\sAdd\sreferences/jwt-hs256.tcl\swith\sjwt-hs256-test.tcl,\sa\sworked\sexample\sof\sa\sMAC\swhose\skey\sis\schosen\sby\sthe\speer\s-\sit\schecks\sthe\stoken\sheader\sagainst\sthe\sexpected\salgorithm\sinstead\sof\strusting\sit,\svalidates\sthe\ssignature\slength\sbefore\snacl::auth\sverify\ssees\sit,\senforces\sexp\sand\snbf,\sand\shands\sthe\ssecret\sover\sat\sits\soriginal\slength\n-\sAsk\sfor\sTcl\s8.6-\sinstead\sof\s8.6\sin\sboth\smodules,\sas\sthe\sstrict\sform\srefuses\sto\sload\sunder\sTcl\s9\n-\sEvaluate\sthe\sscript\sof\sthe\sthrows\shelper\sin\sboth\stest\ssuites\sthrough\suplevel\s#0,\swithout\swhich\sit\sruns\sin\sthe\swrong\sscope\sand\sthe\stest\spasses\son\sa\smissing\svariable\srather\sthan\son\sthe\serror\sit\smeans\sto\sprovoke
+D 2026-07-31T13:19:26.649
 F .fossil-settings/ignore-glob e120dce0c786cd8d9b96b382c906efec9181ab6d2f8a93b7430950a7402b6f40
 F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
 F LICENSE.nacl a11e84ee203968974e6341fa8315006a1e2cb14a4f91a216f234c787b79f7230
@@ -7,6 +7,12 @@ F LICENSE.terms 8bb94bd557d785c1c7a20282da941bfa6554597e8c2a8af8a33d9ef1b7dfaf86
 F Makefile.in dad887cd037310aac7772db20a66fad74fc12cfa7125cd5e1194518d49d190c6
 F README ddf841412c2d2da5c72b40a1288183adf10c14381307be1aa36803138dceb41e
 F aclocal.m4 42c43a1bd20d7f4febdf9e092b9433b54429b777f8e8c42bb89da8b77f3186ed
+F claude/nacl-tcl/SKILL.md e02fb101582472377b49b20fba88992b9e65475f3e571c730183ffee2ae0f093
+F claude/nacl-tcl/references/config-secrets.md 258987dd6a4cc1880c194eaa83b91b30ccf001cfd64bd959fa1b77c407c5106b
+F claude/nacl-tcl/references/jwt-hs256-test.tcl 4a64e26b020719c8cd8d4e7bfbf7f9d261987088e3003ac7660a94b3fe3d5955
+F claude/nacl-tcl/references/jwt-hs256.tcl 5cbb77861286cb2f8429b2b44cc2de1e0d32418a56c548e16c104fdd6483ebc1
+F claude/nacl-tcl/references/secretbox-store-test.tcl f664576c7139f3be05b0b6a38ee8d07392108cee2e5c9ebe8c0699224c002133
+F claude/nacl-tcl/references/secretbox-store.tcl 0e5692883fb2727a7565b6cca713804887fb953fc0cd7ae007dca498ba4ed1c7
 F configure d7f58df8084a3ae66206cf1f6f964b6c3e29186bc87d0c1445cdb212a161ce02 x
 F configure.ac 5810b3b3aa2c43e10de2892062fbd06977ee08e20c10e17a99f4f7807fb862a2
 F doc/coolnacl-20120725.pdf b5d29b0c3a3b22ee3014e393ad7458c4677493a5feb6ff7f0342bab6a06debcd
@@ -51,8 +57,8 @@ F win/nmakehlp.c 190bf8b40f6f90eeb6cbc1e5c13a19fc7ad870e479e0314c88174f71bf9e28a
 F win/rules-ext.vc 566230fdd999a957c27007ebfa8022aa523bdb64243d8efcdad1c9c8fc3cdae7
 F win/rules.vc 6eeb14ea0b8c551b93a1d3721a7474819e966b65a208523ab8eb1593c565e226
 F win/targets.vc 96a25a1fa6e9e9cfb348fd3760a5395b4ce8acafc8ed10f0412937ec200d5dbd
-P 145905b372259740d69587617ea31d72fcaf44434582c08a56589243c8331969
-R 1b52dd3365b40175afc1e277a2b751f1
+P 55edae8b8e3d7170b0c5889de71d7601eb1677f846d57a51690cdf1a6d60adf2
+R 1edb73d1a9f56bdb0730a4328a5283a0
 U alex
-Z c99a4027a906022f7b2e3b3fd769a949
+Z 80dfba1bbbe98394e7f492c5a0cbfff2
 # Remove this line to create a well-formed Fossil manifest.
