@@ -183,8 +183,8 @@ COMPILE		= $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(C
 
 all: manifest.h binaries libraries doc
 
-manifest.h: manifest manifest.uuid tools/mkversion.tcl
-	$(TCLSH_PROG) tools/mkversion.tcl -defines > $@
+manifest.h: $(srcdir)/manifest $(srcdir)/manifest.uuid $(srcdir)/tools/mkversion.tcl
+	$(TCLSH_PROG) $(srcdir)/tools/mkversion.tcl -defines > $@
 
 #========================================================================
 # The binaries target builds executable programs, Windows .dll's, unix
@@ -235,8 +235,10 @@ install-doc: doc
 	@$(INSTALL_DATA_DIR) $(DESTDIR)$(mandir)/mann
 	@echo "Installing documentation in $(DESTDIR)$(mandir)"
 	@list='$(srcdir)/doc/*.n'; for i in $$list; do \
-	    echo "Installing $$i"; \
-	    $(INSTALL_DATA) $$i $(DESTDIR)$(mandir)/mann ; \
+	    if test -f $$i ; then \
+		echo "Installing $$i"; \
+		$(INSTALL_DATA) $$i $(DESTDIR)$(mandir)/mann ; \
+	    fi ; \
 	done
 
 test: binaries libraries

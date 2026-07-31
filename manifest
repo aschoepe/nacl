@@ -1,10 +1,10 @@
-C Include\ssys/random.h\sand\sfix\sthe\sreturn\svalue\shandling\sof\sgetrandom\n\n-\sCheck\sfor\ssys/random.h\sin\sCHECK_FOR_GETRANDOM\sand\sinclude\sit\sin\srandombytes.c,\ssince\sglibc\sdeclares\sgetrandom\sthere\swhile\slinux/random.h\sonly\scarries\sthe\sGRND_\sflags\s-\swithout\sit\sthe\sfunction\sstays\simplicitly\sdeclared,\swhich\sa\scompiler\sdefaulting\sto\sC23\streats\sas\san\serror\srather\sthan\sa\swarning\n-\sGuard\sthe\sinclude\sof\slinux/random.h\swith\sHAVE_LINUX_RANDOM_H,\swhich\sconfigure\shas\sbeen\sdefining\sall\salong\swithout\sanyone\sacting\son\sit\n-\sTreat\sa\snegative\sresult\sof\sgetrandom\sas\sthe\sfailure\sit\sis:\sthe\sprevious\sexpression\sreturned\ssuccess\sfor\sit,\sbecause\s-1\sis\strue\sin\sC,\sleaving\sthe\scaller\swith\san\suninitialised\sbuffer\swhere\skey\smaterial\swas\sexpected\n-\sLoop\saround\sgetrandom\sinstead\sof\scalling\sit\sonce,\sas\sGRND_RANDOM\syields\sat\smost\s512\sbytes\sper\scall\sand\sany\scall\scan\sbe\scut\sshort\sby\sa\ssignal,\sand\sretry\son\sEINTR
-D 2026-07-31T14:03:02.950
+C Make\san\sout\sof\stree\sbuild\swork\n\n-\sReach\smanifest,\smanifest.uuid\sand\smkversion.tcl\sthrough\ssrcdir\sin\sthe\srule\sfor\smanifest.h,\sso\sthat\sa\sbuild\sdirectory\soutside\sthe\ssource\stree\sfinds\sthem\sinstead\sof\slooking\sbeside\sthe\sMakefile\n-\sLet\stools/mkversion.tcl\schange\sinto\sthe\ssource\stree\son\sits\sown,\sderived\sfrom\sthe\slocation\sof\sthe\sscript,\sas\sit\sreads\smanifest,\smanifest.uuid\sand\sconfigure.ac\sby\srelative\spath\sand\swould\sotherwise\sdepend\son\sthe\sdirectory\sit\swas\sstarted\sfrom\n-\sTest\sfor\sthe\sfile\sin\sinstall-doc\sbefore\sinstalling\sit,\sso\sthat\sa\sdoc\sdirectory\sholding\sno\s.n\spage\sleaves\sthe\sunexpanded\sglob\swith\sinstall\sand\saborts\sthe\srun\sno\slonger
+D 2026-07-31T22:07:20.918
 F .fossil-settings/ignore-glob 4176a3e7e71f37ea1756a38bc444d4c5044c809cdc326bc5f0137b07a34748af
 F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
 F LICENSE.nacl a11e84ee203968974e6341fa8315006a1e2cb14a4f91a216f234c787b79f7230
 F LICENSE.terms 8bb94bd557d785c1c7a20282da941bfa6554597e8c2a8af8a33d9ef1b7dfaf86
-F Makefile.in dad887cd037310aac7772db20a66fad74fc12cfa7125cd5e1194518d49d190c6
+F Makefile.in b3a9ef0a6a6f13981aeab7995104fd59582fc6ce4fb2ab78d3a43bc18832b69d
 F README ddf841412c2d2da5c72b40a1288183adf10c14381307be1aa36803138dceb41e
 F aclocal.m4 72180f757ddba7f5bbbcd3e640d2dd5f1d5cbd719d5524633d13b444a0697cf1
 F claude/nacl-tcl/SKILL.md 52b061fd6f1862b77e2c876b22cb55d6834b3e9e3ff20cf06747ba3478fcaae0
@@ -50,15 +50,15 @@ F tests/scalarmult.test 4ff4ab965da497721c5fcb01c230dd2dd166eb543477eb02fa660158
 F tests/secretbox.test 7599fcd8c26a387b17f7b9f0e520c5e4c95ab68ad5527da4abf64cae77059125
 F tests/sign.test 70e12cf4f686b90dcbaf8ee8ebad190257fe7debde116b6c908546922b7c2040
 F tests/stream.test 3ac51bebceb6ad9c4321215e9ec1c345bcf1fc24aa0c0543e762701a33e07fbb
-F tools/mkversion.tcl 79af84aa1e11456632dfb9527293bff4f9038693a7f8ce4e1dd35cabd00122e2
+F tools/mkversion.tcl b4d936fc6e55d794e2578e146c336b661196cf281ad664b73af6ef86abf61327
 F win/makefile.vc 98c26ab2f1a0d2a7af1b25686fed6536feb8b7d021169e5b2cc780c8cfec1527
 F win/nacl.rc 06639157fa4a4d324dd1b10629c0e9baca39961570841be7515a527988f18b25 x
 F win/nmakehlp.c 190bf8b40f6f90eeb6cbc1e5c13a19fc7ad870e479e0314c88174f71bf9e28a7
 F win/rules-ext.vc 566230fdd999a957c27007ebfa8022aa523bdb64243d8efcdad1c9c8fc3cdae7
 F win/rules.vc 6eeb14ea0b8c551b93a1d3721a7474819e966b65a208523ab8eb1593c565e226
 F win/targets.vc 96a25a1fa6e9e9cfb348fd3760a5395b4ce8acafc8ed10f0412937ec200d5dbd
-P 524699aee7659aadeccf54c3a7bcd48038428f78cf51b537f070ce4128ae3a51
-R ac7ce3e7379f8fdc0c42358c4149ffa2
+P 243a909988fa27360ccc81e79a98dc74df350085db133fec896972639d3ef6c8
+R e62d68805462bebeb801ab14fe302838
 U alex
-Z d1959b2798ca9d85274f10c02c597440
+Z 9502dbd930df583d21dc017424243d5a
 # Remove this line to create a well-formed Fossil manifest.

@@ -12,6 +12,10 @@ set optDefines 0
 set optPkgName 0
 set pkgName {}
 
+# manifest, manifest.uuid und configure.ac immer aus dem Quellbaum lesen,
+# unabhaengig davon, aus welchem (Build-)Verzeichnis das Skript laeuft
+cd [file join [file dirname [file normalize [info script]]] ..]
+
 
 # Note:
 # fossil GUI Settings Manifest = on.
