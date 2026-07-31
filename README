@@ -1,61 +1,81 @@
+# NaCl: Networking and Cryptography library (pronounced "salt")
 
-    NaCl: Networking and Cryptography library (pronounced "salt")
-
-
-    This directory contains a freely distributable thread-safe extension to Tcl/Tk called nacl.
-
-
-SYSNOPSIS
-
-    NaCl (pronounced "salt") is a new easy-to-use high-speed software library for
-    network communication, encryption, decryption, signatures, etc. NaCl's goal is
-    to provide all of the core operations needed to build higher-level cryptographic
-    tools.
-
-    Of course, other libraries already exist for these core operations. NaCl advances
-    the state of the art by improving security, by improving usability, and by
-    improving speed.
-
-    For information on how to use these commands, see the examples, hints and the home
-    pages at https://tcl.sowaswie.de/repos/fossil/nacl.
-    
-
-GETTING THE CODE
-
-    The development repository is hosted at https://tcl.sowaswie.de/repos/fossil/nacl
-    You are encouraged to use trunk.
+This directory contains a freely distributable thread-safe extension to Tcl/Tk
+called nacl.
 
 
-COMPILING nacl
+## Synopsis
 
-    Go to the main directory and invoke the configure script:
-    
-        ./configure
-	make
-        make test
-        make install
+NaCl (pronounced "salt") is a new easy-to-use high-speed software library for
+network communication, encryption, decryption, signatures, etc. NaCl's goal is
+to provide all of the core operations needed to build higher-level cryptographic
+tools.
 
-    Since nacl is TEA-compatible you should be able to build it using the MinGW build
-    environment for Windows. There is also the MSVC nmake file so you can compile the
-    package with Microsoft tools.  Refer to the README in the win directory for more
-    details about building on Windows.
+Of course, other libraries already exist for these core operations. NaCl advances
+the state of the art by improving security, by improving usability, and by
+improving speed.
 
-    The compile process will build the nacl shared library suitable for loading into
-    the Tcl shell using standard "package require" mechanism.
+For information on how to use these commands, see the examples, hints and the
+home pages at https://tcl.sowaswie.de/repos/fossil/nacl.
 
 
-REPORTING BUGS
+## HMAC authentication
 
-    Please head to https://tcl.sowaswie.de/repos/fossil/nacl/ticket and
-    click on "New Ticket". Log in as anonymous and report your findings.
-    If you prefer to have an individual login write Alex a mail.
+`nacl::auth` accepts a key of any length and prepares it as RFC 2104 section 2
+requires: a key longer than the block size of the hash is replaced by its hash,
+a shorter one is padded with zero bytes. The block size is 64 bytes for
+`-hmac256` and 128 bytes for `-hmac512256`.
+
+    nacl::auth ?-hmac256|-hmac512256? authVariable messageValue keyValue
+    nacl::auth verify -hmac256|-hmac512256 authValue messageValue keyValue
+
+`-hmac256` is plain HMAC-SHA-256, the algorithm behind JWT `HS256` and most
+webhook signatures, where the secret is chosen by the peer. `nacl::auth verify`
+compares in constant time and returns 0 on a match. A key of exactly 32 bytes
+produces the same result as in earlier releases.
 
 
-HISTORY
+## Getting the code
 
-    The core NaCl development team consists of Daniel J. Bernstein (University of
-    Illinois at Chicago and Technische Universiteit Eindhoven), Tanja Lange (Technische
-    Universiteit Eindhoven), and Peter Schwabe (Radboud Universiteit Nijmegen).
+The development repository is hosted at
+https://tcl.sowaswie.de/repos/fossil/nacl. You are encouraged to use trunk.
 
-    The nacl tcl packge was started by Alexander Schoepe (alx.tcl@sowaswie.de).
 
+## Compiling nacl
+
+Go to the main directory and invoke the configure script:
+
+    ./configure
+    make
+    make test
+    make install
+
+Since nacl is TEA-compatible you should be able to build it using the MinGW build
+environment for Windows. There is also the MSVC nmake file so you can compile the
+package with Microsoft tools. Refer to the README in the win directory for more
+details about building on Windows.
+
+The compile process will build the nacl shared library suitable for loading into
+the Tcl shell using standard `package require` mechanism.
+
+The version of a build can be queried at runtime:
+
+    nacl::build-info                  ;# version, check-in and compiler
+    nacl::manifest                    ;# dict with version, date, check-in, uuid
+
+
+## Reporting bugs
+
+Please head to https://tcl.sowaswie.de/repos/fossil/nacl/ticket and click on
+"New Ticket". Log in as anonymous and report your findings. If you prefer to have
+an individual login write Alex a mail.
+
+
+## History
+
+The core NaCl development team consists of Daniel J. Bernstein (University of
+Illinois at Chicago and Technische Universiteit Eindhoven), Tanja Lange
+(Technische Universiteit Eindhoven), and Peter Schwabe (Radboud Universiteit
+Nijmegen).
+
+The nacl tcl package was started by Alexander Schoepe (alx.tcl@sowaswie.de).

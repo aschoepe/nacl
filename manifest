@@ -1,11 +1,11 @@
-C Prepare\sHMAC\skeys\sof\sany\slength\sas\sRFC\s2104\srequires\n\n-\sAccept\sa\skey\sof\sany\slength\sin\snacl::auth\sand\snacl::auth\sverify\s-\sthe\sformer\scheck\srejected\severything\sbut\sexactly\scrypto_auth_KEYBYTES,\swhich\smade\sthe\scommand\sunusable\sfor\sJWT\sHS256\sand\scomparable\sprotocols,\swhere\sthe\ssecret\sis\schosen\sby\sthe\speer\sand\schanges\sits\slength\swhenever\sit\sis\srotated\n-\sAdd\sTnacl_AuthKeyPad\sperforming\sthe\spreparation\sof\sRFC\s2104\ssection\s2\s-\sa\skey\slonger\sthan\sthe\sblock\ssize\sof\sthe\shash\sis\sreplaced\sby\sits\shash,\sa\sshorter\sone\sis\spadded\swith\szero\sbytes,\sthe\sblock\ssize\sbeing\s64\sbytes\sfor\s-hmac256\sand\s128\sbytes\sfor\s-hmac512256\n-\sAdd\sthe\s_kpad\svariants\sof\sboth\sreference\sprimitives,\staking\sthe\skey\salready\sexpanded\sto\sa\sfull\sblock\sinstead\sof\sthe\s32\sbytes\sthe\sNaCl\sinterface\sprescribes\s-\sthis\sis\sthe\spart\sthat\scannot\sbe\sdone\sby\sthe\scaller,\ssince\sa\skey\sbetween\s33\sand\s64\sbytes\shas\sto\sbe\spadded\srather\sthan\shashed\sand\sdoes\snot\sfit\sthrough\sthe\sold\sinterface\n-\sKeep\scrypto_auth_hmacsha256_ref\sand\scrypto_auth_hmacsha512256_ref\sas\swrappers\szero\spadding\stheir\s32\sbyte\skey,\sso\sthat\sthe\sNaCl\sinterface\sand\sall\sother\scallers\sremain\suntouched\n-\sLeave\sthe\sresult\sfor\sa\skey\sof\sexactly\s32\sbytes\sunchanged\sbit\sfor\sbit,\swhile\severy\sother\slength\sused\sto\sraise\san\serror,\sso\sno\sexisting\scall\scan\syield\sa\sdifferent\svalue\sthan\sbefore\n-\sCover\sRFC\s4231\ssection\s4\stest\scases\s1\sto\s7\sfor\sboth\salgorithms\sin\stests/auth.test,\stogether\swith\sa\skey\sof\sexactly\sblock\ssize,\san\sempty\skey,\sand\sa\sverify\sthat\shas\sto\sreject\sa\swrong\skey\n-\sRecord\sin\sdoc/help.txt\sthat\sthe\skey\slength\sof\s32\sbytes\sreported\sby\snacl::auth\sinfo\sis\swhat\snacl::random\s-auth\sgenerates\sand\snot\san\supper\sbound
-D 2026-07-31T12:42:11.631
+C Rewrite\sREADME\sin\smarkdown\sand\sdocument\sthe\sHMAC\skey\spreparation\n\n-\sSet\sthe\sREADME\sin\smarkdown\swhile\skeeping\sits\sfile\sname,\sso\sthat\sthe\sglob\sREADME*\sin\sMakefile.in\sstill\spicks\sit\sup\sfor\sthe\sdistribution\sand\snothing\shas\sto\sbe\srenamed\n-\sAdd\sa\ssection\son\sHMAC\sauthentication\sstating\sthat\snacl::auth\stakes\sa\skey\sof\sany\slength\sand\sprepares\sit\sas\sRFC\s2104\ssection\s2\srequires,\sthe\sblock\ssize\sbeing\s64\sbytes\sfor\s-hmac256\sand\s128\sbytes\sfor\s-hmac512256\n-\sPoint\sout\sthat\s-hmac256\sis\sthe\salgorithm\sbehind\sJWT\sHS256\sand\smost\swebhook\ssignatures,\sthat\snacl::auth\sverify\scompares\sin\sconstant\stime,\sand\sthat\sa\skey\sof\sexactly\s32\sbytes\sstill\syields\sthe\sresult\sof\searlier\sreleases\n-\sMention\snacl::build-info\sand\snacl::manifest\sas\sthe\sway\sto\squery\sversion\sand\scheck-in\sof\sa\sbuild\sat\sruntime
+D 2026-07-31T12:51:47.726
 F .fossil-settings/ignore-glob e120dce0c786cd8d9b96b382c906efec9181ab6d2f8a93b7430950a7402b6f40
 F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
 F LICENSE.nacl a11e84ee203968974e6341fa8315006a1e2cb14a4f91a216f234c787b79f7230
 F LICENSE.terms 8bb94bd557d785c1c7a20282da941bfa6554597e8c2a8af8a33d9ef1b7dfaf86
 F Makefile.in dad887cd037310aac7772db20a66fad74fc12cfa7125cd5e1194518d49d190c6
-F README 72fa48b75f1fb8b1956a854ee76389e941d89d5a6d357fb9e09da6d0d1ef0b13
+F README ddf841412c2d2da5c72b40a1288183adf10c14381307be1aa36803138dceb41e
 F aclocal.m4 42c43a1bd20d7f4febdf9e092b9433b54429b777f8e8c42bb89da8b77f3186ed
 F configure d7f58df8084a3ae66206cf1f6f964b6c3e29186bc87d0c1445cdb212a161ce02 x
 F configure.ac 5810b3b3aa2c43e10de2892062fbd06977ee08e20c10e17a99f4f7807fb862a2
@@ -51,8 +51,8 @@ F win/nmakehlp.c 190bf8b40f6f90eeb6cbc1e5c13a19fc7ad870e479e0314c88174f71bf9e28a
 F win/rules-ext.vc 566230fdd999a957c27007ebfa8022aa523bdb64243d8efcdad1c9c8fc3cdae7
 F win/rules.vc 6eeb14ea0b8c551b93a1d3721a7474819e966b65a208523ab8eb1593c565e226
 F win/targets.vc 96a25a1fa6e9e9cfb348fd3760a5395b4ce8acafc8ed10f0412937ec200d5dbd
-P c1873c9db9811eed22820f3ee2409b864adef54791a7b71bf6ebf1b4a602aa87
-R 4426c9717675ced4e14601e5dff1beb7
+P dfb88cc2291808867241ae482b4ab3a1a537e93d91c0413142ea2d38a761681a
+R 88ec9bfae8558e8a02a08ec9a3d28c14
 U alex
-Z a6d6c253b3bbb400ba75823878e69712
+Z 87dd73fcb1cfee4d2536a0cc62027a5f
 # Remove this line to create a well-formed Fossil manifest.
