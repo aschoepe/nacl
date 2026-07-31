@@ -67,6 +67,36 @@ if {[nacl::auth -hmac512256 auth $message $key] == 0} {
   }
 }
 
+# The same with the untruncated tag, using nacl::auth -hmac512
+#
+# -hmac512256 is NaCl's crypto_auth and produces 32 bytes, the computation
+# cut in half. -hmac512 produces the full 64 bytes that RFC 4231 and JWT
+# HS512 are defined on. Take -hmac512256 where both ends are yours and the
+# NaCl primitive is what is meant, and -hmac512 wherever the tag has to
+# match another implementation.
+
+package require nacl
+
+set key [nacl::randombytes auth -key]
+set message {My Message}
+
+if {[nacl::auth -hmac512 auth $message $key] == 0} {
+  puts "tag is [string length $auth] bytes"
+  if {[nacl::auth verify -hmac512 $auth $message $key] == 0} {
+    puts {authentication OK}
+  }
+}
+
+# verify insists on the tag length of its variant: handing a 32 byte tag to
+# -hmac512, or a 64 byte one to -hmac512256, is refused with
+# "wrong # auth length ... bytes required" instead of being compared.
+#
+# One caveat with an older nacl: Tcl matches option names by prefix, so on a
+# build that does not know -hmac512 the string is an unambiguous prefix of
+# -hmac512256. Such a call succeeds and returns 32 bytes where 64 were meant,
+# and there is no error to catch. Check the length of the tag, or require a
+# version of the package that has -hmac512.
+
 # Secret-key cryptography one-time authentication using nacl::onetimeauth
 
 package require nacl
@@ -75,7 +105,7 @@ set key [nacl::randombytes onetimeauth -key]
 set message {My Message}
 
 if {[nacl::onetimeauth auth $message $key] == 0} {
-  if {[nacl: onetimeauth verify $auth $message $key] == 0} {
+  if {[nacl::onetimeauth verify $auth $message $key] == 0} {
     puts {one-time authentication OK}
   }
 }

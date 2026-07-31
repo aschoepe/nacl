@@ -73,7 +73,7 @@ TEA_SETUP_COMPILER
 
 AC_DEFINE(TWEETNACL_VERSION, "20140427")
 
-TEA_ADD_SOURCES([randombytes.c tweetnacl.c crypto_hashblocks_sha256.c crypto_hash_sha256.c crypto_auth_hmacsha256.c crypto_auth_hmacsha512256.c nacl.c])
+TEA_ADD_SOURCES([randombytes.c tweetnacl.c crypto_hashblocks_sha256.c crypto_hash_sha256.c crypto_auth_hmacsha256.c crypto_auth_hmacsha512.c crypto_auth_hmacsha512256.c nacl.c])
 TEA_ADD_HEADERS([])
 TEA_ADD_INCLUDES([])
 TEA_ADD_LIBS([])

@@ -1982,8 +1982,8 @@ static int Tnacl_Stream (void * clientData, Tcl_Interp *interp, int objc, Tcl_Ob
  * crypto_auth_hmacsha256_ref, crypto_auth_hmacsha512256_ref
    nacl::auth info
      auth 32 key 32
-   nacl::auth ?-hmac256|-hmac512256? authVariable messageValue keyValue
-   nacl::auth verify -hmac256|-hmac512256 authValue messageValue keyValue
+   nacl::auth ?-hmac256|-hmac512256|-hmac512? authVariable messageValue keyValue
+   nacl::auth verify -hmac256|-hmac512256|-hmac512 authValue messageValue keyValue
  */
 
 /*
@@ -2024,10 +2024,10 @@ static int Tnacl_Auth(void * clientData, Tcl_Interp *interp, int objc, Tcl_Obj *
   } cmd;
 
   static const char *const option[] = {
-    "-hmac256", "-hmac512256", NULL
+    "-hmac256", "-hmac512256", "-hmac512", NULL
   };
   enum option {
-    TNACL_AUTH_HMAC256, TNACL_AUTH_HMAC512256
+    TNACL_AUTH_HMAC256, TNACL_AUTH_HMAC512256, TNACL_AUTH_HMAC512
   } hmac;
 
   if (objc < 2) {
@@ -2073,7 +2073,7 @@ static int Tnacl_Auth(void * clientData, Tcl_Interp *interp, int objc, Tcl_Obj *
 
     case TNACL_AUTH: {
       if (objc != (idx + 3)) {
-	Tcl_WrongNumArgs(interp, 1, objv, "?-hmac256|-hmac512256? authVariable messageValue keyValue");
+	Tcl_WrongNumArgs(interp, 1, objv, "?-hmac256|-hmac512256|-hmac512? authVariable messageValue keyValue");
 	//                                 idx                    +0           +1           +2
 	return TCL_ERROR;
       }
@@ -2083,6 +2083,8 @@ static int Tnacl_Auth(void * clientData, Tcl_Interp *interp, int objc, Tcl_Obj *
       unsigned char kpad[crypto_auth_hmacsha512256_BLOCKBYTES];
       int rc;
       Tcl_Size mLen, kLen;
+      /* -hmac512 is the only variant with a tag longer than crypto_auth_BYTES */
+      int aBytes = (hmac == TNACL_AUTH_HMAC512) ? crypto_auth_hmacsha512_BYTES : crypto_auth_BYTES;
 
       // 0:authVariable
       aObjPtr = Tcl_ObjGetVar2(interp, objv[idx + 0], (Tcl_Obj*) NULL, 0);
@@ -2097,11 +2099,14 @@ static int Tnacl_Auth(void * clientData, Tcl_Interp *interp, int objc, Tcl_Obj *
       // 2:keyValue, any length, prepared according to RFC 2104
       k = Tcl_GetByteArrayFromObj(objv[idx + 2], &kLen);
 
-      a = Tcl_SetByteArrayLength(aObjPtr, crypto_auth_BYTES);
+      a = Tcl_SetByteArrayLength(aObjPtr, aBytes);
 
       if (hmac == TNACL_AUTH_HMAC256) {
 	Tnacl_AuthKeyPad(kpad, crypto_auth_hmacsha256_BLOCKBYTES, k, kLen);
 	rc = crypto_auth_hmacsha256_ref_kpad(a, m, mLen, kpad);
+      } else if (hmac == TNACL_AUTH_HMAC512) {
+	Tnacl_AuthKeyPad(kpad, crypto_auth_hmacsha512_BLOCKBYTES, k, kLen);
+	rc = crypto_auth_hmacsha512_ref_kpad(a, m, mLen, kpad);
       } else {
 	Tnacl_AuthKeyPad(kpad, crypto_auth_hmacsha512256_BLOCKBYTES, k, kLen);
 	rc = crypto_auth_hmacsha512256_ref_kpad(a, m, mLen, kpad);
@@ -2119,7 +2124,7 @@ static int Tnacl_Auth(void * clientData, Tcl_Interp *interp, int objc, Tcl_Obj *
 
     case TNACL_AUTH_VERIFY: {
       if (objc != (idx + 3)) {
-	Tcl_WrongNumArgs(interp, 1, objv, "verify ?-hmac256|-hmac512256? authValue messageValue keyValue");
+	Tcl_WrongNumArgs(interp, 1, objv, "verify ?-hmac256|-hmac512256|-hmac512? authValue messageValue keyValue");
 	//                                 idx    idx                    +0        +1           +2
 	return TCL_ERROR;
       }
@@ -2128,11 +2133,13 @@ static int Tnacl_Auth(void * clientData, Tcl_Interp *interp, int objc, Tcl_Obj *
       unsigned char kpad[crypto_auth_hmacsha512256_BLOCKBYTES];
       int rc;
       Tcl_Size aLen, mLen, kLen;
+      /* -hmac512 is the only variant with a tag longer than crypto_auth_BYTES */
+      int aBytes = (hmac == TNACL_AUTH_HMAC512) ? crypto_auth_hmacsha512_BYTES : crypto_auth_BYTES;
 
       // 0:authValue
       a = Tcl_GetByteArrayFromObj(objv[idx + 0], &aLen);
-      if (aLen != crypto_auth_BYTES) {
-	Tcl_SetObjResult(interp, Tcl_ObjPrintf("wrong # auth length %d bytes required", crypto_auth_BYTES));
+      if (aLen != aBytes) {
+	Tcl_SetObjResult(interp, Tcl_ObjPrintf("wrong # auth length %d bytes required", aBytes));
 	return TCL_ERROR;
       }
 
@@ -2145,6 +2152,9 @@ static int Tnacl_Auth(void * clientData, Tcl_Interp *interp, int objc, Tcl_Obj *
       if (hmac == TNACL_AUTH_HMAC256) {
 	Tnacl_AuthKeyPad(kpad, crypto_auth_hmacsha256_BLOCKBYTES, k, kLen);
 	rc = crypto_auth_hmacsha256_ref_kpad_verify(a, m, mLen, kpad);
+      } else if (hmac == TNACL_AUTH_HMAC512) {
+	Tnacl_AuthKeyPad(kpad, crypto_auth_hmacsha512_BLOCKBYTES, k, kLen);
+	rc = crypto_auth_hmacsha512_ref_kpad_verify(a, m, mLen, kpad);
       } else {
 	Tnacl_AuthKeyPad(kpad, crypto_auth_hmacsha512256_BLOCKBYTES, k, kLen);
 	rc = crypto_auth_hmacsha512256_ref_kpad_verify(a, m, mLen, kpad);

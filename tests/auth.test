@@ -51,38 +51,46 @@ test auth-1.5 {auth verify hmac256} {
 # RFC 4231 section 4 test vectors. The key is handed over unchanged in
 # whatever length it has and gets prepared by nacl::auth as required by
 # RFC 2104 section 2. For -hmac512256 the RFC 4231 HMAC-SHA-512 result
-# truncated to crypto_auth_BYTES applies.
+# truncated to crypto_auth_BYTES applies, for -hmac512 the full 64 byte
+# result of the RFC -- the fifth column is the second half of it.
 #
 
 set rfc4231 {}
 lappend rfc4231 [list 1 [binary decode hex [string repeat 0b 20]] {Hi There} \
   b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7 \
-  87aa7cdea5ef619d4ff0b4241a1d6cb02379f4e2ce4ec2787ad0b30545e17cde]
+  87aa7cdea5ef619d4ff0b4241a1d6cb02379f4e2ce4ec2787ad0b30545e17cde \
+  daa833b7d6b8a702038b274eaea3f4e4be9d914eeb61f1702e696c203a126854]
 lappend rfc4231 [list 2 Jefe {what do ya want for nothing?} \
   5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843 \
-  164b7a7bfcf819e2e395fbe73b56e0a387bd64222e831fd610270cd7ea250554]
+  164b7a7bfcf819e2e395fbe73b56e0a387bd64222e831fd610270cd7ea250554 \
+  9758bf75c05a994a6d034f65f8f0e6fdcaeab1a34d4a6b4b636e070a38bce737]
 lappend rfc4231 [list 3 [binary decode hex [string repeat aa 20]] \
   [binary decode hex [string repeat dd 50]] \
   773ea91e36800e46854db8ebd09181a72959098b3ef8c122d9635514ced565fe \
-  fa73b0089d56a284efb0f0756c890be9b1b5dbdd8ee81a3655f83e33b2279d39]
+  fa73b0089d56a284efb0f0756c890be9b1b5dbdd8ee81a3655f83e33b2279d39 \
+  bf3e848279a722c806b485a47e67c807b946a337bee8942674278859e13292fb]
 lappend rfc4231 [list 4 [binary decode hex 0102030405060708090a0b0c0d0e0f10111213141516171819] \
   [binary decode hex [string repeat cd 50]] \
   82558a389a443c0ea4cc819899f2083a85f0faa3e578f8077a2e3ff46729665b \
-  b0ba465637458c6990e5a8c5f61d4af7e576d97ff94b872de76f8050361ee3db]
+  b0ba465637458c6990e5a8c5f61d4af7e576d97ff94b872de76f8050361ee3db \
+  a91ca5c11aa25eb4d679275cc5788063a5f19741120c4f2de2adebeb10a298dd]
 lappend rfc4231 [list 5 [binary decode hex [string repeat 0c 20]] {Test With Truncation} \
   a3b6167473100ee06e0c796c2955552bfa6f7c0a6a8aef8b93f860aab0cd20c5 \
-  415fad6271580a531d4179bc891d87a650188707922a4fbb36663a1eb16da008]
+  415fad6271580a531d4179bc891d87a650188707922a4fbb36663a1eb16da008 \
+  711c5b50ddd0fc235084eb9d3364a1454fb2ef67cd1d29fe6773068ea266e96b]
 lappend rfc4231 [list 6 [binary decode hex [string repeat aa 131]] \
   {Test Using Larger Than Block-Size Key - Hash Key First} \
   60e431591ee0b67f0d8a26aacbf5b77f8e0bc6213728c5140546040f0ee37f54 \
-  80b24263c7c1a3ebb71493c1dd7be8b49b46d1f41b4aeec1121b013783f8f352]
+  80b24263c7c1a3ebb71493c1dd7be8b49b46d1f41b4aeec1121b013783f8f352 \
+  6b56d037e05f2598bd0fd2215d6a1e5295e64f73f63f0aec8b915a985d786598]
 lappend rfc4231 [list 7 [binary decode hex [string repeat aa 131]] \
   {This is a test using a larger than block-size key and a larger than block-size data. The key needs to be hashed before being used by the HMAC algorithm.} \
   9b09ffa71b942fcb27635fbcd5b0e944bfdc63644f0713938a7f51535c3a35e2 \
-  e37b6a775dc87dbaa4dfa9f96e5e3ffddebd71f8867289865df5a32d20cdc944]
+  e37b6a775dc87dbaa4dfa9f96e5e3ffddebd71f8867289865df5a32d20cdc944 \
+  b6022cac3c4982b10d5eeb55c3e4de15134676fb6de0446065c97440fa8c6a58]
 
 foreach tc $rfc4231 {
-  lassign $tc nr key msg e256 e512
+  lassign $tc nr key msg e256 e512 e512tail
 
   test auth-2.$nr "auth hmac256 rfc 4231 tc $nr, key [string length $key] bytes" {
     nacl::auth -hmac256 auth $msg $key
@@ -100,6 +108,16 @@ foreach tc $rfc4231 {
     list [nacl::auth verify -hmac256 $auth $msg $key] \
 	 [nacl::auth verify -hmac512256 $auth2 $msg $key]
   } {0 0}
+
+  test auth-6.$nr "auth hmac512 rfc 4231 tc $nr, key [string length $key] bytes" {
+    nacl::auth -hmac512 auth $msg $key
+    binary encode hex $auth
+  } $e512$e512tail
+
+  test auth-7.$nr "auth verify hmac512 rfc 4231 tc $nr, key [string length $key] bytes" {
+    nacl::auth -hmac512 auth $msg $key
+    nacl::auth verify -hmac512 $auth $msg $key
+  } 0
 }
 
 #
@@ -128,6 +146,51 @@ test auth-5.4 {auth verify rejects a wrong key} {
   nacl::auth -hmac256 auth {Hi There} [string repeat A 64]
   nacl::auth verify -hmac256 $auth {Hi There} [string repeat A 63]
 } -1
+
+#
+# -hmac512 is the untruncated HMAC-SHA-512 that RFC 7518 HS512 is defined
+# on. NaCl has no such primitive; crypto_auth is the same computation cut
+# to 32 bytes, which is what -hmac512256 exposes.
+#
+
+test auth-8.1 {auth hmac512 yields a 64 byte tag} {
+  nacl::auth -hmac512 auth {Hi There} [string repeat A 64]
+  string length $auth
+} 64
+
+test auth-8.2 {hmac512 starts with the hmac512256 tag} {
+  nacl::auth -hmac512    auth  {Hi There} Jefe
+  nacl::auth -hmac512256 auth2 {Hi There} Jefe
+  string equal [string range $auth 0 31] $auth2
+} 1
+
+test auth-8.3 {verify hmac512 rejects a tag of the truncated length} {
+  nacl::auth -hmac512256 auth {Hi There} Jefe
+  list [catch {nacl::auth verify -hmac512 $auth {Hi There} Jefe} e] $e
+} {1 {wrong # auth length 64 bytes required}}
+
+test auth-8.4 {verify hmac512256 rejects a tag of the full length} {
+  nacl::auth -hmac512 auth {Hi There} Jefe
+  list [catch {nacl::auth verify -hmac512256 $auth {Hi There} Jefe} e] $e
+} {1 {wrong # auth length 32 bytes required}}
+
+test auth-8.5 {verify hmac512 rejects a wrong key} {
+  nacl::auth -hmac512 auth {Hi There} [string repeat A 64]
+  nacl::auth verify -hmac512 $auth {Hi There} [string repeat A 63]
+} -1
+
+test auth-8.6 {verify hmac512 rejects a flipped bit in the second half} {
+  nacl::auth -hmac512 auth {Hi There} Jefe
+  set bad $auth
+  set b [scan [string index $bad 40] %c]
+  set bad [string replace $bad 40 40 [format %c [expr {$b ^ 1}]]]
+  nacl::auth verify -hmac512 $bad {Hi There} Jefe
+} -1
+
+test auth-8.7 {hmac512 key of block size, no truncation involved} {
+  nacl::auth -hmac512 auth {Hi There} [string repeat A 64]
+  string length [binary encode hex $auth]
+} 128
 
 # cleanup
 ::tcltest::cleanupTests
