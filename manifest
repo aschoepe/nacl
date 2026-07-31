@@ -1,5 +1,5 @@
-C Provide\sa\sfallback\sfor\snacl::build-info\swhen\sTcl\sdoes\snot\ssupply\stcl::build-info\n\n-\sRegister\s::nacl::build-info\sunconditionally\s-\sit\sused\sto\sbe\screated\sonly\swhen\sTcl_GetCommandInfo\sfound\s::tcl::build-info,\sso\son\san\sinterpreter\slacking\sthat\scommand,\sTcl\s8.6\samong\sthem,\snacl::build-info\sdid\snot\sexist\sat\sall\n-\sAdd\sthe\sstatic\sTnacl_BuildInfo\sas\sthat\sfallback\s-\sit\sparses\sthe\sbuild\sinfo\sstring\shanded\sover\sas\sclient\sdata\sand\sis\sinstalled\swhenever\s::tcl::build-info\sis\sabsent,\swhile\sTcl's\sown\sobjProc\sis\sstill\sreused\swhen\sit\sis\spresent\n-\sSupport\sthe\ssubcommands\sversion,\spatchlevel,\scommit\sand\scompiler\s-\sversion\sreturns\smajor.minor\swhile\spatchlevel\sreturns\sthe\sfull\spackage\sversion,\scommit\sreturns\sthe\suuid\sbetween\sthe\splus\ssign\sand\sthe\sfollowing\sdot,\sand\scompiler\sreports\sthe\s.clang-\s.gcc-\s.msvc-\sor\s.icc-\smarker\sup\sto\sthe\snext\sdot\n-\sReturn\sthe\swhole\sbuild\sinfo\sstring\swhen\scalled\swithout\sa\ssubcommand,\sreport\san\sunknown\soption\sas\san\serror\snaming\sthe\svalid\sones,\sand\sreject\sa\ssurplus\sargument\sthrough\sTcl_WrongNumArgs\n-\sConcatenate\sMANIFEST_UUID\sdirectly\sinstead\sof\spassing\sit\sthrough\sSTRINGIFY\s-\sthe\smacro\salready\sexpands\sto\sa\squoted\sstring,\sso\sstringifying\sit\sa\ssecond\stime\sembedded\sliteral\squotes\sinto\sthe\scommit\sfield\n-\sClamp\seach\sfield\scopied\sinto\sthe\slocal\s128\sbyte\sbuffer\sto\sits\ssize\sso\sthat\smemcpy\sstays\sin\sbounds
-D 2026-07-31T12:22:55.128
+C Prepare\sHMAC\skeys\sof\sany\slength\sas\sRFC\s2104\srequires\n\n-\sAccept\sa\skey\sof\sany\slength\sin\snacl::auth\sand\snacl::auth\sverify\s-\sthe\sformer\scheck\srejected\severything\sbut\sexactly\scrypto_auth_KEYBYTES,\swhich\smade\sthe\scommand\sunusable\sfor\sJWT\sHS256\sand\scomparable\sprotocols,\swhere\sthe\ssecret\sis\schosen\sby\sthe\speer\sand\schanges\sits\slength\swhenever\sit\sis\srotated\n-\sAdd\sTnacl_AuthKeyPad\sperforming\sthe\spreparation\sof\sRFC\s2104\ssection\s2\s-\sa\skey\slonger\sthan\sthe\sblock\ssize\sof\sthe\shash\sis\sreplaced\sby\sits\shash,\sa\sshorter\sone\sis\spadded\swith\szero\sbytes,\sthe\sblock\ssize\sbeing\s64\sbytes\sfor\s-hmac256\sand\s128\sbytes\sfor\s-hmac512256\n-\sAdd\sthe\s_kpad\svariants\sof\sboth\sreference\sprimitives,\staking\sthe\skey\salready\sexpanded\sto\sa\sfull\sblock\sinstead\sof\sthe\s32\sbytes\sthe\sNaCl\sinterface\sprescribes\s-\sthis\sis\sthe\spart\sthat\scannot\sbe\sdone\sby\sthe\scaller,\ssince\sa\skey\sbetween\s33\sand\s64\sbytes\shas\sto\sbe\spadded\srather\sthan\shashed\sand\sdoes\snot\sfit\sthrough\sthe\sold\sinterface\n-\sKeep\scrypto_auth_hmacsha256_ref\sand\scrypto_auth_hmacsha512256_ref\sas\swrappers\szero\spadding\stheir\s32\sbyte\skey,\sso\sthat\sthe\sNaCl\sinterface\sand\sall\sother\scallers\sremain\suntouched\n-\sLeave\sthe\sresult\sfor\sa\skey\sof\sexactly\s32\sbytes\sunchanged\sbit\sfor\sbit,\swhile\severy\sother\slength\sused\sto\sraise\san\serror,\sso\sno\sexisting\scall\scan\syield\sa\sdifferent\svalue\sthan\sbefore\n-\sCover\sRFC\s4231\ssection\s4\stest\scases\s1\sto\s7\sfor\sboth\salgorithms\sin\stests/auth.test,\stogether\swith\sa\skey\sof\sexactly\sblock\ssize,\san\sempty\skey,\sand\sa\sverify\sthat\shas\sto\sreject\sa\swrong\skey\n-\sRecord\sin\sdoc/help.txt\sthat\sthe\skey\slength\sof\s32\sbytes\sreported\sby\snacl::auth\sinfo\sis\swhat\snacl::random\s-auth\sgenerates\sand\snot\san\supper\sbound
+D 2026-07-31T12:42:11.631
 F .fossil-settings/ignore-glob e120dce0c786cd8d9b96b382c906efec9181ab6d2f8a93b7430950a7402b6f40
 F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
 F LICENSE.nacl a11e84ee203968974e6341fa8315006a1e2cb14a4f91a216f234c787b79f7230
@@ -11,17 +11,17 @@ F configure d7f58df8084a3ae66206cf1f6f964b6c3e29186bc87d0c1445cdb212a161ce02 x
 F configure.ac 5810b3b3aa2c43e10de2892062fbd06977ee08e20c10e17a99f4f7807fb862a2
 F doc/coolnacl-20120725.pdf b5d29b0c3a3b22ee3014e393ad7458c4677493a5feb6ff7f0342bab6a06debcd
 F doc/examples.txt 9e02d753f6cbb89b184874bd90591bea9df8b86ce5039e7b0982c0d4783d36db
-F doc/help.txt e5b80ba9f8b9cf5666a1725250f3d03b8e77238224a770bd268c09c7d42e8f26
+F doc/help.txt 933679e76fd1a82d78c3e5cef820e925e0b9c83f77790a38c7f25004b0c7d175
 F doc/nacl.n 298a5292cc824af50c6dafd2a435c08b87096accd93182828bf158ab93a0164a
 F doc/naclcrypto-20090310.pdf bb81e3e7833f1b33a8a1dff4cbc60dca80a603f90673b129905640bf24fb9da7
 F doc/securing-communication.pdf 9de0c5ddbd148592d243278cd8ddbd219f75fade38d4f22445e9d4dda9e1c56a
 F doc/tweetnacl-20140917.pdf d2c242b7830552c36e3719b738094fe83dd5c020dea4f3cdd3d138452b44ce75
-F generic/crypto_auth_hmacsha256.c b6113e7ae2cf63014b66bec600bf4bda75a9015a93ea2cf0ed38ef401e51faf6
-F generic/crypto_auth_hmacsha512256.c 95435d998c8de59f3d537af660c609155c2130a51bf885f0e5c9b45c642c8cac
+F generic/crypto_auth_hmacsha256.c 427090674443d02e2123887f1901abe1c2dbed2561c3ae1a43226a3690ba0533
+F generic/crypto_auth_hmacsha512256.c 307cc1af305816ce06b8f73afdb047f0c69307c75d20e58a2aa8426920ff7143
 F generic/crypto_hash_sha256.c cb99e51b557432ed185144a9b6f2160a206158c809bb977968ab92744c1618f5
 F generic/crypto_hashblocks_sha256.c 71f663c3d8ad51b186997902c32a1869abb616d1cc8625f75d68a92021155125
-F generic/crypto_reference.h f360b7fb68d1fd61c71eeaa6ab7562d9d6faeacdf8ec05f4787a9baf5b308275
-F generic/nacl.c 0be9686f2a42fe258a7332b3d613e0c862e5902c2b86a25340a85321b2ffb981 x
+F generic/crypto_reference.h 836b7cb0ecf47ec28da70cad34d25ebb44f16c3803e70e68aeb24313b10fbc06
+F generic/nacl.c 72aaaa6da3e5a834a5f0389ca1b26bfdaca791ec26707501e68efd69e5d5c1f9 x
 F generic/randombytes.c 73ee98ff51e5745fd7a350de8a9375fb8a64b5055f584771e28dff4323e448bf
 F generic/randombytes.h af7f7b0d4074e7f371ac725511c51361a1113f98536b8396df4959329b8c5dc1
 F generic/tweetnacl.c ce64213575c9d7e1547b6c170824c3a8eaa2948c9bca9b1f87c9beedb0ef4137
@@ -34,7 +34,7 @@ F tclconfig/install-sh 2182b3705d92e25753411e2c28cf788c69e35a48fbb8aa332e342dfc6
 F tclconfig/license.terms 0639ae334eb9a347fa0e1e0a260f52757c0aa2aaf4609689eb318b3460efcf79
 F tclconfig/tcl.m4 3565d3c5df429387def7de0237662d3b8b63fae745c6606f5b3f5a1e1f40343c
 F tests/all.tcl 5f87ca6b7d1e5bf0aa6e3a7fa4408f629ab2a224cc20910fb12ea6928f1aecbd
-F tests/auth.test 3716a9000db0fa33bb926c0eb9305e642ba78354cddd697f324e352ead4f5eca
+F tests/auth.test fc927f9c786f5fcb7523be77e393ad0da7f079a60f7db0c66d3851d33b6012fa
 F tests/box.test 1b0e1376eedff8dac0bc45ff19575add477f410c3897dab6aa93e18c8db68b2d
 F tests/hash.test 79f4f54f8faab2a2bb92cc64f009d6bff0cadcd47a795c8141f917c37de97459
 F tests/info.test a6ee065951550d8e5bbf98869c552f3e582967f3ae622cc205ceabc644579b7a
@@ -51,8 +51,8 @@ F win/nmakehlp.c 190bf8b40f6f90eeb6cbc1e5c13a19fc7ad870e479e0314c88174f71bf9e28a
 F win/rules-ext.vc 566230fdd999a957c27007ebfa8022aa523bdb64243d8efcdad1c9c8fc3cdae7
 F win/rules.vc 6eeb14ea0b8c551b93a1d3721a7474819e966b65a208523ab8eb1593c565e226
 F win/targets.vc 96a25a1fa6e9e9cfb348fd3760a5395b4ce8acafc8ed10f0412937ec200d5dbd
-P c570ff228be8f57089a8432c34531473c72b659a00ef77328d7ff2f8dfe90946
-R c69b6bf81ae3c4d867bba238244c2acc
+P c1873c9db9811eed22820f3ee2409b864adef54791a7b71bf6ebf1b4a602aa87
+R 4426c9717675ced4e14601e5dff1beb7
 U alex
-Z df146c7c0c5fd011c8fe69b81d159267
+Z a6d6c253b3bbb400ba75823878e69712
 # Remove this line to create a well-formed Fossil manifest.

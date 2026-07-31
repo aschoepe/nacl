@@ -25,7 +25,13 @@ static const unsigned char iv[64] = {
   0x5b,0xe0,0xcd,0x19,0x13,0x7e,0x21,0x79
 } ;
 
-int crypto_auth_hmacsha512256_ref(unsigned char *out,const unsigned char *in,unsigned long long inlen,const unsigned char *k)
+/*
+ * kpad holds the key already prepared according to RFC 2104 section 2:
+ * hashed if it was longer than the block size, then zero padded to the
+ * full block size of 128 bytes.
+ */
+
+int crypto_auth_hmacsha512256_ref_kpad(unsigned char *out,const unsigned char *in,unsigned long long inlen,const unsigned char *kpad)
 {
   unsigned char h[64];
   unsigned char padded[256];
@@ -34,8 +40,7 @@ int crypto_auth_hmacsha512256_ref(unsigned char *out,const unsigned char *in,uns
 
   for (i = 0;i < 64;++i) h[i] = iv[i];
 
-  for (i = 0;i < 32;++i) padded[i] = k[i] ^ 0x36;
-  for (i = 32;i < 128;++i) padded[i] = 0x36;
+  for (i = 0;i < 128;++i) padded[i] = kpad[i] ^ 0x36;
 
   blocks(h,padded,128);
   blocks(h,in,inlen);
@@ -72,8 +77,7 @@ int crypto_auth_hmacsha512256_ref(unsigned char *out,const unsigned char *in,uns
     blocks(h,padded,256);
   }
 
-  for (i = 0;i < 32;++i) padded[i] = k[i] ^ 0x5c;
-  for (i = 32;i < 128;++i) padded[i] = 0x5c;
+  for (i = 0;i < 128;++i) padded[i] = kpad[i] ^ 0x5c;
 
   for (i = 0;i < 64;++i) padded[128 + i] = h[i];
   for (i = 0;i < 64;++i) h[i] = iv[i];
@@ -88,8 +92,31 @@ int crypto_auth_hmacsha512256_ref(unsigned char *out,const unsigned char *in,uns
   return 0;
 }
 
+/*
+ * The NaCl interface takes a key of exactly crypto_auth_KEYBYTES, which is
+ * the zero padded block of the same key.
+ */
+
+int crypto_auth_hmacsha512256_ref(unsigned char *out,const unsigned char *in,unsigned long long inlen,const unsigned char *k)
+{
+  unsigned char kpad[128];
+  int i;
+
+  for (i = 0;i < 32;++i) kpad[i] = k[i];
+  for (i = 32;i < 128;++i) kpad[i] = 0;
+
+  return crypto_auth_hmacsha512256_ref_kpad(out,in,inlen,kpad);
+}
+
 //#include "crypto_verify_32.h"
 //#include "crypto_auth.h"
+
+int crypto_auth_hmacsha512256_ref_kpad_verify(const unsigned char *h,const unsigned char *in,unsigned long long inlen,const unsigned char *kpad)
+{
+  unsigned char correct[32];
+  crypto_auth_hmacsha512256_ref_kpad(correct,in,inlen,kpad);
+  return crypto_verify_32(h,correct);
+}
 
 int crypto_auth_hmacsha512256_ref_verify(const unsigned char *h,const unsigned char *in,unsigned long long inlen,const unsigned char *k)
 {

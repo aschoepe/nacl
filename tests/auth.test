@@ -47,6 +47,88 @@ test auth-1.5 {auth verify hmac256} {
   nacl::auth verify -hmac256 $a1 $m1 $k1
 } 0
 
+#
+# RFC 4231 section 4 test vectors. The key is handed over unchanged in
+# whatever length it has and gets prepared by nacl::auth as required by
+# RFC 2104 section 2. For -hmac512256 the RFC 4231 HMAC-SHA-512 result
+# truncated to crypto_auth_BYTES applies.
+#
+
+set rfc4231 {}
+lappend rfc4231 [list 1 [binary decode hex [string repeat 0b 20]] {Hi There} \
+  b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7 \
+  87aa7cdea5ef619d4ff0b4241a1d6cb02379f4e2ce4ec2787ad0b30545e17cde]
+lappend rfc4231 [list 2 Jefe {what do ya want for nothing?} \
+  5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843 \
+  164b7a7bfcf819e2e395fbe73b56e0a387bd64222e831fd610270cd7ea250554]
+lappend rfc4231 [list 3 [binary decode hex [string repeat aa 20]] \
+  [binary decode hex [string repeat dd 50]] \
+  773ea91e36800e46854db8ebd09181a72959098b3ef8c122d9635514ced565fe \
+  fa73b0089d56a284efb0f0756c890be9b1b5dbdd8ee81a3655f83e33b2279d39]
+lappend rfc4231 [list 4 [binary decode hex 0102030405060708090a0b0c0d0e0f10111213141516171819] \
+  [binary decode hex [string repeat cd 50]] \
+  82558a389a443c0ea4cc819899f2083a85f0faa3e578f8077a2e3ff46729665b \
+  b0ba465637458c6990e5a8c5f61d4af7e576d97ff94b872de76f8050361ee3db]
+lappend rfc4231 [list 5 [binary decode hex [string repeat 0c 20]] {Test With Truncation} \
+  a3b6167473100ee06e0c796c2955552bfa6f7c0a6a8aef8b93f860aab0cd20c5 \
+  415fad6271580a531d4179bc891d87a650188707922a4fbb36663a1eb16da008]
+lappend rfc4231 [list 6 [binary decode hex [string repeat aa 131]] \
+  {Test Using Larger Than Block-Size Key - Hash Key First} \
+  60e431591ee0b67f0d8a26aacbf5b77f8e0bc6213728c5140546040f0ee37f54 \
+  80b24263c7c1a3ebb71493c1dd7be8b49b46d1f41b4aeec1121b013783f8f352]
+lappend rfc4231 [list 7 [binary decode hex [string repeat aa 131]] \
+  {This is a test using a larger than block-size key and a larger than block-size data. The key needs to be hashed before being used by the HMAC algorithm.} \
+  9b09ffa71b942fcb27635fbcd5b0e944bfdc63644f0713938a7f51535c3a35e2 \
+  e37b6a775dc87dbaa4dfa9f96e5e3ffddebd71f8867289865df5a32d20cdc944]
+
+foreach tc $rfc4231 {
+  lassign $tc nr key msg e256 e512
+
+  test auth-2.$nr "auth hmac256 rfc 4231 tc $nr, key [string length $key] bytes" {
+    nacl::auth -hmac256 auth $msg $key
+    binary encode hex $auth
+  } $e256
+
+  test auth-3.$nr "auth hmac512256 rfc 4231 tc $nr, key [string length $key] bytes" {
+    nacl::auth -hmac512256 auth $msg $key
+    binary encode hex $auth
+  } $e512
+
+  test auth-4.$nr "auth verify rfc 4231 tc $nr, key [string length $key] bytes" {
+    nacl::auth -hmac256 auth $msg $key
+    nacl::auth -hmac512256 auth2 $msg $key
+    list [nacl::auth verify -hmac256 $auth $msg $key] \
+	 [nacl::auth verify -hmac512256 $auth2 $msg $key]
+  } {0 0}
+}
+
+#
+# A key of block size is neither hashed nor padded. This is the length a
+# client secret of an OpenID Connect provider typically has, and the case
+# that no zero padding of a 32 byte key can reach.
+#
+
+test auth-5.1 {auth hmac256 key of block size} {
+  nacl::auth -hmac256 auth {Hi There} [string repeat A 64]
+  binary encode hex $auth
+} f648295f5ebc1fbfc3cbffe85c56aefaf649b2f8546ecd275b9437df56e5a1c0
+
+test auth-5.2 {auth hmac256 empty key} {
+  nacl::auth -hmac256 auth {Hi There} {}
+  binary encode hex $auth
+} e48411262715c8370cd5e7bf8e82bef53bd53712d007f3429351843b77c7bb9b
+
+test auth-5.3 {auth hmac512256 short key equals zero padded key} {
+  nacl::auth -hmac512256 auth {what do ya want for nothing?} Jefe
+  nacl::auth -hmac512256 auth2 {what do ya want for nothing?} Jefe[string repeat \x00 28]
+  string equal $auth $auth2
+} 1
+
+test auth-5.4 {auth verify rejects a wrong key} {
+  nacl::auth -hmac256 auth {Hi There} [string repeat A 64]
+  nacl::auth verify -hmac256 $auth {Hi There} [string repeat A 63]
+} -1
+
 # cleanup
 ::tcltest::cleanupTests
 return

@@ -1986,6 +1986,35 @@ static int Tnacl_Stream (ClientData clientData, Tcl_Interp *interp, int objc, Tc
    nacl::auth verify -hmac256|-hmac512256 authValue messageValue keyValue
  */
 
+/*
+ * RFC 2104 section 2 key preparation. A key longer than the block size B of
+ * the hash is replaced by its hash, any key shorter than B is padded with
+ * zero bytes on the right. There is no lower bound: RFC 2104 section 3 only
+ * recommends at least L bytes, so a short key is valid HMAC and is accepted.
+ * A key of exactly crypto_auth_KEYBYTES yields the very block the NaCl
+ * primitives build internally, hence that case is unchanged.
+ */
+
+static void Tnacl_AuthKeyPad(unsigned char *kpad, int blockLen, const unsigned char *k, Tcl_Size kLen) {
+  unsigned char h[64];
+
+  if (kLen > blockLen) {
+    if (blockLen == crypto_auth_hmacsha512256_BLOCKBYTES) {
+      crypto_hash_sha512(h, k, (unsigned long long)kLen);
+      kLen = 64;
+    } else {
+      crypto_hash_sha256_ref(h, k, (unsigned long long)kLen);
+      kLen = 32;
+    }
+    k = h;
+  }
+
+  if (kLen > 0)
+    memcpy(kpad, k, kLen);
+  memset(kpad + kLen, 0, blockLen - kLen);
+}
+
+
 static int Tnacl_Auth(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   static const char *const command[] = {
     "info", "verify", NULL
@@ -2051,6 +2080,7 @@ static int Tnacl_Auth(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_O
 
       Tcl_Obj *aObjPtr;
       unsigned char *a, *m, *k;
+      unsigned char kpad[crypto_auth_hmacsha512256_BLOCKBYTES];
       int rc;
       Tcl_Size mLen, kLen;
 
@@ -2064,19 +2094,17 @@ static int Tnacl_Auth(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_O
       // 1:messageValue
       m = Tcl_GetByteArrayFromObj(objv[idx + 1], &mLen);
 
-      // 2:keyValue
+      // 2:keyValue, any length, prepared according to RFC 2104
       k = Tcl_GetByteArrayFromObj(objv[idx + 2], &kLen);
-      if (kLen != crypto_auth_KEYBYTES) {
-	Tcl_SetObjResult(interp, Tcl_ObjPrintf("wrong # key length %d bytes required", crypto_auth_KEYBYTES));
-	return TCL_ERROR;
-      }
 
       a = Tcl_SetByteArrayLength(aObjPtr, crypto_auth_BYTES);
 
       if (hmac == TNACL_AUTH_HMAC256) {
-	rc = crypto_auth_hmacsha256_ref(a, m, mLen, k);
+	Tnacl_AuthKeyPad(kpad, crypto_auth_hmacsha256_BLOCKBYTES, k, kLen);
+	rc = crypto_auth_hmacsha256_ref_kpad(a, m, mLen, kpad);
       } else {
-	rc = crypto_auth_hmacsha512256_ref(a, m, mLen, k);
+	Tnacl_AuthKeyPad(kpad, crypto_auth_hmacsha512256_BLOCKBYTES, k, kLen);
+	rc = crypto_auth_hmacsha512256_ref_kpad(a, m, mLen, kpad);
       }
 
       if (rc == 0) {
@@ -2097,6 +2125,7 @@ static int Tnacl_Auth(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_O
       }
 
       unsigned char *a, *m, *k;
+      unsigned char kpad[crypto_auth_hmacsha512256_BLOCKBYTES];
       int rc;
       Tcl_Size aLen, mLen, kLen;
 
@@ -2110,17 +2139,15 @@ static int Tnacl_Auth(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_O
       // 1:messageValue
       m = Tcl_GetByteArrayFromObj(objv[idx + 1], &mLen);
 
-      // 2:keyValue
+      // 2:keyValue, any length, prepared according to RFC 2104
       k = Tcl_GetByteArrayFromObj(objv[idx + 2], &kLen);
-      if (kLen != crypto_auth_KEYBYTES) {
-	Tcl_SetObjResult(interp, Tcl_ObjPrintf("wrong # key length %d bytes required", crypto_auth_KEYBYTES));
-	return TCL_ERROR;
-      }
 
       if (hmac == TNACL_AUTH_HMAC256) {
-	rc = crypto_auth_hmacsha256_ref_verify(a, m, mLen, k);
+	Tnacl_AuthKeyPad(kpad, crypto_auth_hmacsha256_BLOCKBYTES, k, kLen);
+	rc = crypto_auth_hmacsha256_ref_kpad_verify(a, m, mLen, kpad);
       } else {
-	rc = crypto_auth_hmacsha512256_ref_verify(a, m, mLen, k);
+	Tnacl_AuthKeyPad(kpad, crypto_auth_hmacsha512256_BLOCKBYTES, k, kLen);
+	rc = crypto_auth_hmacsha512256_ref_kpad_verify(a, m, mLen, kpad);
       }
 
       Tcl_SetObjResult(interp, Tcl_NewIntObj(rc));

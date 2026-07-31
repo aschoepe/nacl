@@ -53,6 +53,14 @@
   nacl::auth ?-hmac256|-hmac512256? authVariable messageValue keyValue
   nacl::auth verify -hmac256|-hmac512256 authValue messageValue keyValue
 
+  keyValue may have any length. It is prepared as RFC 2104 section 2
+  requires: a key longer than the block size of the hash is replaced by
+  its hash, a shorter one is padded with zero bytes. The block size is
+  64 bytes for -hmac256 and 128 bytes for -hmac512256. The key length
+  of 32 bytes reported by nacl::auth info is what nacl::random -auth
+  generates, not a limit. RFC 2104 sets no lower bound, so keeping a
+  key of at least 32 bytes is left to the caller.
+
 * crypto_onetimeauth = crypto_onetimeauth_poly1305
   nacl::info
     auth 16 key 32
