@@ -1,5 +1,5 @@
-C Fix\sthe\skey\slabels\sreported\sby\snacl::auth\sinfo\sand\snacl::stream\sinfo\n\n-\sReport\skey\sinstead\sof\snonce\sin\snacl::auth\sinfo\s-\sthere\sis\sno\snonce\sin\sHMAC\sauthentication,\sand\sthe\svalue\sprinted\snext\sto\sthe\slabel\shas\salways\sbeen\scrypto_auth_KEYBYTES\n-\sReport\skey\sinstead\sof\spublic-key\sin\snacl::stream\sinfo\s-\scrypto_stream\stakes\sa\ssecret\skey,\snot\sa\spublic\sone,\sand\sthe\svalue\sis\scrypto_stream_KEYBYTES\n-\sAdjust\sthe\sexpectations\sin\stests/auth.test\sand\stests/stream.test\saccordingly,\swhich\scarried\sthe\swrong\slabels\salong\n-\sLeave\sdoc/help.txt\suntouched,\sas\sit\shas\sdocumented\skey\sfor\sboth\scommands\sall\salong\sand\snow\sagrees\swith\swhat\sthe\scommands\sreport
-D 2026-07-31T13:01:20.007
+C Correct\sthe\sinfo\soutput\sand\stwo\scommand\snames\sin\sdoc/help.txt\n\n-\sDrop\snonce\s24\sfrom\sthe\ssign\sinfo\sline\s-\sEd25519\ssignatures\shave\sno\snonce,\sand\snacl::sign\sinfo\shas\snever\sreported\sone\n-\sSpell\sthe\scommand\sof\sthe\scrypto_onetimeauth\ssection\sas\snacl::onetimeauth\sinfo,\swhere\sit\sread\snacl::info\sand\sthereby\snamed\sa\sdifferent\scommand\n-\sWrite\sthe\slength\sprefix\sas\scipher+\sand\ssign+\sthe\sway\sthe\scommands\sactually\sprint\sit,\srather\sthan\sas\scipher\s+16\sand\ssign\s+64\n-\sName\snacl::randombytes\sauth\s-key\sas\sthe\sgenerator\sof\sthe\s32\sbyte\skey,\ssince\sthe\snacl::random\s-auth\smentioned\sbefore\sdoes\snot\sexist
+D 2026-07-31T13:05:53.476
 F .fossil-settings/ignore-glob e120dce0c786cd8d9b96b382c906efec9181ab6d2f8a93b7430950a7402b6f40
 F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
 F LICENSE.nacl a11e84ee203968974e6341fa8315006a1e2cb14a4f91a216f234c787b79f7230
@@ -11,7 +11,7 @@ F configure d7f58df8084a3ae66206cf1f6f964b6c3e29186bc87d0c1445cdb212a161ce02 x
 F configure.ac 5810b3b3aa2c43e10de2892062fbd06977ee08e20c10e17a99f4f7807fb862a2
 F doc/coolnacl-20120725.pdf b5d29b0c3a3b22ee3014e393ad7458c4677493a5feb6ff7f0342bab6a06debcd
 F doc/examples.txt 9e02d753f6cbb89b184874bd90591bea9df8b86ce5039e7b0982c0d4783d36db
-F doc/help.txt 933679e76fd1a82d78c3e5cef820e925e0b9c83f77790a38c7f25004b0c7d175
+F doc/help.txt fb5b881430cd895f3c54d820d9bd8c1a7260156682c8971dd341c44b553a9508
 F doc/nacl.n 298a5292cc824af50c6dafd2a435c08b87096accd93182828bf158ab93a0164a
 F doc/naclcrypto-20090310.pdf bb81e3e7833f1b33a8a1dff4cbc60dca80a603f90673b129905640bf24fb9da7
 F doc/securing-communication.pdf 9de0c5ddbd148592d243278cd8ddbd219f75fade38d4f22445e9d4dda9e1c56a
@@ -51,8 +51,8 @@ F win/nmakehlp.c 190bf8b40f6f90eeb6cbc1e5c13a19fc7ad870e479e0314c88174f71bf9e28a
 F win/rules-ext.vc 566230fdd999a957c27007ebfa8022aa523bdb64243d8efcdad1c9c8fc3cdae7
 F win/rules.vc 6eeb14ea0b8c551b93a1d3721a7474819e966b65a208523ab8eb1593c565e226
 F win/targets.vc 96a25a1fa6e9e9cfb348fd3760a5395b4ce8acafc8ed10f0412937ec200d5dbd
-P 2c958785e145ebe59f25dab91edee346f4a6494dbe5f584adce3601e436eee5d
-R c59f1126353afe220242dfa4d6144601
+P 145905b372259740d69587617ea31d72fcaf44434582c08a56589243c8331969
+R 1b52dd3365b40175afc1e277a2b751f1
 U alex
-Z 7c488723c52ad06f8e482b365c3e96fe
+Z c99a4027a906022f7b2e3b3fd769a949
 # Remove this line to create a well-formed Fossil manifest.
