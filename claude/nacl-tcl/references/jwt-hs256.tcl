@@ -11,10 +11,12 @@
 # lang sein - selbst auffuellen oder vorher hashen ergibt einen ANDEREN Tag, den
 # keine Gegenstelle bestaetigt.
 #
-# NUR HS256. Was nacl unter -hmac512256 anbietet, ist HMAC-SHA-512 auf 32 Byte
-# gekuerzt und damit NICHT das HS512 aus RFC 7518 (das 64 Byte Tag verlangt).
-# Wer HS384/HS512 braucht, nimmt eine andere Bibliothek - ein gekuerzter Tag,
-# der als HS512 ausgegeben wird, ist ein stiller Interoperabilitaetsfehler.
+# Dieses Modul deckt HS256 ab. HS384 und HS512 sind mit nacl ab 1.4 ebenso
+# erreichbar, ueber -hmac384 und -hmac512; dafuer genuegt es, den erwarteten
+# Algorithmus und die Taglaenge unten mitzufuehren. Was NICHT als HS512 taugt,
+# ist -hmac512256: dieselbe Rechnung auf 32 Byte gekuerzt, waehrend RFC 7518
+# 64 Byte verlangt - ein gekuerzter Tag als HS512 ausgegeben ist ein stiller
+# Interoperabilitaetsfehler.
 #
 # Die drei Wege, auf denen eine JWT-Pruefung ueblicherweise scheitert, und was
 # dieses Modul dagegen tut:

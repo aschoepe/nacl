@@ -1,5 +1,5 @@
-C Add\sHMAC-SHA-224\sand\sHMAC-SHA-384,\scompleting\sthe\sfour\sRFC\s4231\salgorithms\n\n-\sParametrise\sboth\sHMAC\scores\sby\sinitial\sstate\sand\sinner\shash\slength,\sso\sthat\sSHA-224\srides\son\sthe\sSHA-256\score\sand\sSHA-384\son\sthe\sSHA-512\sone,\sand\sencode\sthe\slength\sof\sthe\souter\smessage\sfrom\sthat\sinner\slength\sinstead\sof\sa\sconstant,\ssince\sa\sshortened\sinner\sresult\smoves\swhere\sthe\spadding\sbegins\n-\sOffer\s-hmac224\sand\s-hmac384\sin\snacl::auth\sand\snacl::auth\sverify,\staking\sthe\stag\slength\sfrom\sthe\svariant\sthrough\sTnacl_AuthBytes,\sand\slift\sthe\soption\senum\sout\sof\sthe\scommand\sso\sthe\shelpers\scan\sname\sits\svalues\n-\sShorten\sa\skey\slonger\sthan\sthe\sblock\ssize\swith\sthe\shash\sof\sits\sown\svariant\srather\sthan\swith\sthe\shash\sof\sequal\sblock\ssize:\sSHA-224\sand\sSHA-384\sstart\sfrom\sa\sdifferent\sstate,\sso\sthe\sprevious\schoice\sby\sblock\ssize\sproduced\sa\stag\sfrom\slength\s65\srespectively\s129\supwards\sthat\sno\sother\simplementation\sagrees\swith\n-\sAdd\scrypto_hash_sha224_ref\sand\scrypto_hash_sha384_ref\sfor\sthat\spurpose,\splaced\sbeside\sthe\sHMAC\sthat\sneeds\sthem,\swhere\sthe\sinitial\sstate\salready\sresides\n-\sVerify\sa\s28\sbyte\stag\sthrough\stwo\soverlapping\scrypto_verify_16\sand\sa\s48\sbyte\sone\sthrough\sa\scrypto_verify_32\splus\sa\scrypto_verify_16,\sboth\sjoined\sby\sa\sbitwise\sor\sso\sthat\severy\sbyte\sis\scompared\son\severy\scall\n-\sCover\sall\sseven\sRFC\s4231\svectors\sfor\sboth\snew\salgorithms\sin\stests/auth.test\sas\srows\sauth-9\sto\sauth-11,\sand\sadd\sauth-12\sfor\sthe\stag\slengths\sof\sall\sfive\svariants,\sthe\srefusal\sof\sa\swrong\slength,\sand\sthe\sfact\sthat\sneither\snew\stag\sis\sa\sprefix\sof\sits\sbigger\ssibling\n-\sDocument\sthe\sfive\svariants\sin\sREADME,\sdoc/help.txt\sand\sdoc/examples.txt,\sincluding\swhich\sof\sthem\sJWT\scalls\sHS256,\sHS384\sand\sHS512
-D 2026-07-31T22:41:31.354
+C Version\s1.4
+D 2026-07-31T22:48:48.399
 F .fossil-settings/ignore-glob 4176a3e7e71f37ea1756a38bc444d4c5044c809cdc326bc5f0137b07a34748af
 F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
 F LICENSE.nacl a11e84ee203968974e6341fa8315006a1e2cb14a4f91a216f234c787b79f7230
@@ -7,14 +7,14 @@ F LICENSE.terms 8bb94bd557d785c1c7a20282da941bfa6554597e8c2a8af8a33d9ef1b7dfaf86
 F Makefile.in b3a9ef0a6a6f13981aeab7995104fd59582fc6ce4fb2ab78d3a43bc18832b69d
 F README 690ace759b1be9b3de2e1054dc66e3c5911f2f32cad8ea2e81ce111790e6ad1d
 F aclocal.m4 72180f757ddba7f5bbbcd3e640d2dd5f1d5cbd719d5524633d13b444a0697cf1
-F claude/nacl-tcl/SKILL.md 52b061fd6f1862b77e2c876b22cb55d6834b3e9e3ff20cf06747ba3478fcaae0
+F claude/nacl-tcl/SKILL.md 652b1e8fde543915c1380d9cbb7557d788dd3d3b9a4a8045b58a201378090e89
 F claude/nacl-tcl/references/config-secrets.md 258987dd6a4cc1880c194eaa83b91b30ccf001cfd64bd959fa1b77c407c5106b
 F claude/nacl-tcl/references/jwt-hs256-test.tcl 4a64e26b020719c8cd8d4e7bfbf7f9d261987088e3003ac7660a94b3fe3d5955
-F claude/nacl-tcl/references/jwt-hs256.tcl 5cbb77861286cb2f8429b2b44cc2de1e0d32418a56c548e16c104fdd6483ebc1
+F claude/nacl-tcl/references/jwt-hs256.tcl b0a421eb73900a505edb0ab0516ed2c688c30a82304eff44db601b159b2b2e18
 F claude/nacl-tcl/references/secretbox-store-test.tcl f664576c7139f3be05b0b6a38ee8d07392108cee2e5c9ebe8c0699224c002133
 F claude/nacl-tcl/references/secretbox-store.tcl 0e5692883fb2727a7565b6cca713804887fb953fc0cd7ae007dca498ba4ed1c7
-F configure 1e034f69ef67ca8fd61001deeef13875ea4ff07aded5856b1b269d11a7cad236 x
-F configure.ac 1836c183c1daa3f2b51eeb8cd8c7d72215ffacc9f23881d0026025e1841d6a7a
+F configure 1d4cb0836da445b75f160436a153f2d07d0900988b90a84acaa50d3944da2a6b x
+F configure.ac 34f5ee65041bd53fbbbed409c0205b048d044b94eb6ca1e10c33c371c6709649
 F doc/coolnacl-20120725.pdf b5d29b0c3a3b22ee3014e393ad7458c4677493a5feb6ff7f0342bab6a06debcd
 F doc/examples.txt ed68ae29eed831e2356078bba62c35afc9401334e27554dfdebd718e35d2e51f
 F doc/help.txt 213e3b870f84479878bc508986daa35faa2f803405e910654103f3ec1d4c439b
@@ -58,8 +58,9 @@ F win/nmakehlp.c 190bf8b40f6f90eeb6cbc1e5c13a19fc7ad870e479e0314c88174f71bf9e28a
 F win/rules-ext.vc 566230fdd999a957c27007ebfa8022aa523bdb64243d8efcdad1c9c8fc3cdae7
 F win/rules.vc 6eeb14ea0b8c551b93a1d3721a7474819e966b65a208523ab8eb1593c565e226
 F win/targets.vc 96a25a1fa6e9e9cfb348fd3760a5395b4ce8acafc8ed10f0412937ec200d5dbd
-P 4ff29f467e2663e0f36092bae66a396d2e0e89ad3fd8ab3a47e9ce06eb6713ef
-R 42b6d270fd8c09e45aadee7c4f293903
+P c6bed6ff35601ba7ea3b0eee6eb0eba2284f27de512725f1c1cc14d171fefc99
+R 5579237beb343c1dd828f56fdc483e32
+T +sym-version-1.4 *
 U alex
-Z 5dde0fd978c59aa7dd5d36f19947b9a3
+Z 22948531717938bb71035a9558991379
 # Remove this line to create a well-formed Fossil manifest.

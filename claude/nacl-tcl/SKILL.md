@@ -18,7 +18,7 @@ description: >
 > Long form / rationale: [references/config-secrets.md](references/config-secrets.md).
 
 Binding for **NaCl / TweetNaCl** primitives in Tcl. Built and installed from this
-repo (`libtcl9nacl1.3.dylib`, `pkgIndex.tcl`). Load with:
+repo (`libtcl9nacl1.4.dylib`, `pkgIndex.tcl`). Load with:
 
 ```tcl
 package require nacl
@@ -63,7 +63,7 @@ set nonce [binary decode hex 6969...0b37]
 | Encrypt + authenticate with a **shared symmetric key**      | `nacl::secretbox`                   |
 | Encrypt-only stream cipher (no MAC — rarely what they want) | `nacl::stream`                      |
 | Sign a message / verify a signature                         | `nacl::sign`                        |
-| MAC a message (long-term key)                               | `nacl::auth` (HMAC-SHA-256/512-256) |
+| MAC a message (long-term key)                               | `nacl::auth` (HMAC-SHA-224/256/384/512) |
 | MAC a message with a one-time key                           | `nacl::onetimeauth` (Poly1305)      |
 | Hash data                                                   | `nacl::hash` (SHA-256 / SHA-512)    |
 | ECDH / shared-secret derivation                             | `nacl::scalarmult`                  |
@@ -196,7 +196,16 @@ nacl::sign verify opened $signed $pub   ;# returns 0 + sets opened to $msg
 
 ### 5. MAC — `nacl::auth`
 
-HMAC-SHA-256 (`-hmac256`) or HMAC-SHA-512-256 (`-hmac512256`). Tag is 32 B.
+Five variants — the four untruncated HMACs of RFC 4231 plus the truncated NaCl
+primitive:
+
+| option | hash | tag | JWT |
+|---|---|---|---|
+| `-hmac224` | SHA-224 | 28 B | — |
+| `-hmac256` | SHA-256 | 32 B | HS256 |
+| `-hmac384` | SHA-384 | 48 B | HS384 |
+| `-hmac512256` | SHA-512 | 32 B | NaCl `crypto_auth`, the default |
+| `-hmac512` | SHA-512 | 64 B | HS512 |
 
 ```tcl
 set key [nacl::randombytes auth -key]
@@ -204,13 +213,14 @@ nacl::auth -hmac512256 tag $msg $key
 nacl::auth verify -hmac512256 $tag $msg $key   ;# returns 0 if valid
 ```
 
-Always pass the same algorithm flag to verify as was used to generate.
+Always pass the same algorithm flag to verify as was used to generate; `verify`
+insists on a tag of the variant's length and refuses any other.
 
 **The key may have any length.** `nacl::auth` prepares it the way RFC 2104
-section 2 requires: longer than the block size of the hash (64 B for
-`-hmac256`, 128 B for `-hmac512256`) it is replaced by its hash, shorter it is
-padded with zero bytes. So a secret that was not generated here — one the other
-side chose, of whatever length — is passed in **as it is**:
+section 2 requires: longer than the block size of the hash (64 B for `-hmac224`
+and `-hmac256`, 128 B for the other three) it is replaced by its hash, shorter
+it is padded with zero bytes. So a secret that was not generated here — one the
+other side chose, of whatever length — is passed in **as it is**:
 
 ```tcl
 nacl::auth -hmac256 tag $msg $secret           ;# $secret in its original length
@@ -220,9 +230,16 @@ nacl::auth verify -hmac256 $tag $msg $secret
 Padding or hashing such a secret yourself before the call produces a different
 and therefore wrong tag. A key of exactly 32 B behaves as it always did.
 
-`-hmac256` is plain HMAC-SHA-256 and is the one to pick when the other side is
-not also `nacl`; `-hmac512256` is the NaCl primitive (HMAC-SHA-512 truncated to
-32 B) and is the default of `nacl::auth`.
+Pick `-hmac512256` where both ends are yours and NaCl's `crypto_auth` is what is
+meant. Everywhere the tag has to match another implementation, pick the variant
+that names the algorithm: `-hmac256`, `-hmac384` or `-hmac512`.
+
+Two of them look interchangeable and are not. `-hmac512` and `-hmac512256` are
+the same computation, the latter cut to 32 B, so one tag is the prefix of the
+other. `-hmac224` and `-hmac384` are **no** such prefixes of `-hmac256` and
+`-hmac512`: SHA-224 and SHA-384 start from a different initial state. That is
+also why a key longer than the block size is shortened with the hash of its own
+variant.
 
 > ## TAKE THE MODULE, DON'T REBUILD IT
 >
@@ -244,9 +261,10 @@ not also `nacl`; `-hmac512256` is the NaCl primitive (HMAC-SHA-512 truncated to
 > one would otherwise raise a Tcl error instead of being rejected), `exp`/`nbf`
 > are enforced, and the secret is used at its original length.
 >
-> HS256 only. `-hmac512256` is HMAC-SHA-512 truncated to 32 B and is **not** the
-> HS512 of RFC 7518, which wants a 64 B tag — emitting one as the other is a
-> silent interoperability bug.
+> The module covers HS256. HS384 and HS512 are reachable the same way through
+> `-hmac384` and `-hmac512`; what must not be substituted for HS512 is
+> `-hmac512256`, which is the same computation cut to 32 B and would be a silent
+> interoperability bug.
 
 ### 6. One-time MAC — `nacl::onetimeauth` (Poly1305)
 
@@ -308,8 +326,8 @@ If unsure about a primitive's parameter sizes at runtime:
 ```tcl
 nacl::info                       ;# package + version metadata
 nacl::manifest                   ;# dict: version, date, check-in, build-hash, uuid
-nacl::build-info                 ;# "1.3+<check-in uuid>.clang-1700"
-nacl::build-info version         ;# "1.3"    (patchlevel, commit, compiler likewise)
+nacl::build-info                 ;# "1.4+<check-in uuid>.clang-1700"
+nacl::build-info version         ;# "1.4"    (patchlevel, commit, compiler likewise)
 nacl::box info                   ;# "cipher+ 16 nonce 24 public-key 32 secret-key 32"
 nacl::secretbox info             ;# "cipher+ 16 nonce 24 key 32"
 nacl::sign info                  ;# "sign+ 64 public-key 32 secret-key 64"
@@ -323,7 +341,7 @@ nacl::scalarmult info            ;# "result 32 scalar 32 group 32"
 ## Reference
 
 - Source: the `nacl` TEA-compatible Tcl extension (build from its source tree)
-- Built artifact: `libtcl9nacl1.3.dylib` + `pkgIndex.tcl`
+- Built artifact: `libtcl9nacl1.4.dylib` + `pkgIndex.tcl`
 - Upstream NaCl docs: see `doc/coolnacl-20120725.pdf`,
   `doc/naclcrypto-20090310.pdf`, `doc/tweetnacl-20140917.pdf`
 - Command summary: `doc/help.txt`
