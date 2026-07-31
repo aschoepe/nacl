@@ -1,6 +1,6 @@
-C Add\sthe\snacl-tcl\sskill\sand\sits\sreference\smodules\n\n-\sAdd\sclaude/nacl-tcl/SKILL.md,\sa\sguide\sto\susing\sthe\spackage\sfrom\sTcl\s-\sthe\scalling\sconvention,\swhich\sprimitive\sto\spick\sfor\sa\sgiven\stask,\sa\srecipe\sper\scommand,\sthe\smistakes\sworth\scatching,\sand\sthe\sinfo,\smanifest\sand\sbuild-info\scommands\sfor\slooking\ssizes\sand\sversions\sup\sat\sruntime\n-\sAdd\sreferences/secretbox-store.tcl\swith\ssecretbox-store-test.tcl,\sa\sready\smade\smodule\skeeping\ssecrets\sat\srest\sas\sa\sself\sdescribing\senc:base64url\sblob\swith\sa\sfresh\snonce\sper\scall\n-\sAdd\sreferences/config-secrets.md\sas\sthe\srationale\sbehind\sthat\sstorage\spattern,\scovering\sthe\sdual\sread\smigration\sand\sthe\squestion\sof\swhere\sthe\skey\sitself\slives\n-\sAdd\sreferences/jwt-hs256.tcl\swith\sjwt-hs256-test.tcl,\sa\sworked\sexample\sof\sa\sMAC\swhose\skey\sis\schosen\sby\sthe\speer\s-\sit\schecks\sthe\stoken\sheader\sagainst\sthe\sexpected\salgorithm\sinstead\sof\strusting\sit,\svalidates\sthe\ssignature\slength\sbefore\snacl::auth\sverify\ssees\sit,\senforces\sexp\sand\snbf,\sand\shands\sthe\ssecret\sover\sat\sits\soriginal\slength\n-\sAsk\sfor\sTcl\s8.6-\sinstead\sof\s8.6\sin\sboth\smodules,\sas\sthe\sstrict\sform\srefuses\sto\sload\sunder\sTcl\s9\n-\sEvaluate\sthe\sscript\sof\sthe\sthrows\shelper\sin\sboth\stest\ssuites\sthrough\suplevel\s#0,\swithout\swhich\sit\sruns\sin\sthe\swrong\sscope\sand\sthe\stest\spasses\son\sa\smissing\svariable\srather\sthan\son\sthe\serror\sit\smeans\sto\sprovoke
-D 2026-07-31T13:19:26.649
-F .fossil-settings/ignore-glob e120dce0c786cd8d9b96b382c906efec9181ab6d2f8a93b7430950a7402b6f40
+C Merge\sbranch\smodern,\sreplacing\sClientData\swith\svoid*\sthroughout\n\n-\sIntegrate\sthe\sbranch\smodern,\swhose\ssingle\scheck-in\sswaps\sClientData\sfor\svoid*\sin\sthe\sten\scommand\shandlers\sand\sin\sthe\seleven\sclient\sdata\scasts\sof\sTcl_CreateObjCommand\n-\sSettle\sthe\smixed\sstyle\sthat\shad\scrept\sin:\sTnacl_BuildInfo\swas\salready\sdeclared\swith\svoid*\swhile\severy\solder\shandler\sstill\sused\sClientData,\sso\snacl.c\sspelled\sthe\ssame\sthing\stwo\sways\n-\sNote\sthat\sthis\sis\sa\smatter\sof\sspelling\srather\sthan\sof\scompatibility\s-\stcl.h\sdeclares\sClientData\sas\sa\splain\stypedef\sof\svoid*\sin\s8.6\sas\swell\sas\sin\s9.0,\swith\sno\sdeprecation\sguard\saround\sit,\sso\sneither\sform\sbreaks\sanywhere\n-\sClose\sthe\sbranch\sthrough\sthe\sintegrate\sflag,\ssince\sit\shad\sbeen\ssitting\sunmerged\ssince\sjanuary\swhile\strunk\smoved\son\ssix\scheck-ins,\sand\sa\slonger\sdivergence\sonly\smakes\sthe\smerge\sharder
+D 2026-07-31T13:29:47.728
+F .fossil-settings/ignore-glob 4176a3e7e71f37ea1756a38bc444d4c5044c809cdc326bc5f0137b07a34748af
 F .gitattributes 9973c70e220d7b30212ae7a21a18d04f7af8d2e7446359c6b5a0ded1a1c7d502
 F LICENSE.nacl a11e84ee203968974e6341fa8315006a1e2cb14a4f91a216f234c787b79f7230
 F LICENSE.terms 8bb94bd557d785c1c7a20282da941bfa6554597e8c2a8af8a33d9ef1b7dfaf86
@@ -27,7 +27,7 @@ F generic/crypto_auth_hmacsha512256.c 307cc1af305816ce06b8f73afdb047f0c69307c75d
 F generic/crypto_hash_sha256.c cb99e51b557432ed185144a9b6f2160a206158c809bb977968ab92744c1618f5
 F generic/crypto_hashblocks_sha256.c 71f663c3d8ad51b186997902c32a1869abb616d1cc8625f75d68a92021155125
 F generic/crypto_reference.h 836b7cb0ecf47ec28da70cad34d25ebb44f16c3803e70e68aeb24313b10fbc06
-F generic/nacl.c f4cfd9064a89e89130aba9b6dc4bda3459908fc5a555216a1373c00d1f835a62 x
+F generic/nacl.c 7dddde9b952cd225e402c887dbc8661122c12cc9b1cc931307ca7c1b9b414590 x
 F generic/randombytes.c 73ee98ff51e5745fd7a350de8a9375fb8a64b5055f584771e28dff4323e448bf
 F generic/randombytes.h af7f7b0d4074e7f371ac725511c51361a1113f98536b8396df4959329b8c5dc1
 F generic/tweetnacl.c ce64213575c9d7e1547b6c170824c3a8eaa2948c9bca9b1f87c9beedb0ef4137
@@ -57,8 +57,9 @@ F win/nmakehlp.c 190bf8b40f6f90eeb6cbc1e5c13a19fc7ad870e479e0314c88174f71bf9e28a
 F win/rules-ext.vc 566230fdd999a957c27007ebfa8022aa523bdb64243d8efcdad1c9c8fc3cdae7
 F win/rules.vc 6eeb14ea0b8c551b93a1d3721a7474819e966b65a208523ab8eb1593c565e226
 F win/targets.vc 96a25a1fa6e9e9cfb348fd3760a5395b4ce8acafc8ed10f0412937ec200d5dbd
-P 55edae8b8e3d7170b0c5889de71d7601eb1677f846d57a51690cdf1a6d60adf2
-R 1edb73d1a9f56bdb0730a4328a5283a0
+P bf1938890a5a5c6f656e9f4f99edafaa86bf483b7f660049b26aee27cf2e2915 444488e2c399e58b2b4d3f76c396dd5b2cff9149ce41138d5a8ab88f29f349bf
+R 510c038bac4fb11fa881729b7036b381
+T +closed 444488e2c399e58b2b4d3f76c396dd5b2cff9149ce41138d5a8ab88f29f349bf
 U alex
-Z 80dfba1bbbe98394e7f492c5a0cbfff2
+Z f183064bccc17d4ee4968e6e831b0382
 # Remove this line to create a well-formed Fossil manifest.

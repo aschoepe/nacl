@@ -9,3 +9,5 @@ manifest.h
 Makefile
 pkgIndex.tcl
 autom4te.cache/*
+*.DS_Store
+.claude/*
