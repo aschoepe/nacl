@@ -24,22 +24,38 @@ home pages at https://tcl.sowaswie.de/repos/fossil/nacl.
 `nacl::auth` accepts a key of any length and prepares it as RFC 2104 section 2
 requires: a key longer than the block size of the hash is replaced by its hash,
 a shorter one is padded with zero bytes. The block size is 64 bytes for
-`-hmac256` and 128 bytes for `-hmac512256` and `-hmac512`.
+`-hmac224` and `-hmac256`, 128 bytes for the other three.
 
-    nacl::auth ?-hmac256|-hmac512256|-hmac512? authVariable messageValue keyValue
-    nacl::auth verify -hmac256|-hmac512256|-hmac512 authValue messageValue keyValue
+    nacl::auth ?-hmac224|-hmac256|-hmac384|-hmac512256|-hmac512?
+        authVariable messageValue keyValue
+    nacl::auth verify -hmac224|-hmac256|-hmac384|-hmac512256|-hmac512
+        authValue messageValue keyValue
+
+| option        | hash       | tag      | JWT   |
+|---------------|------------|----------|-------|
+| `-hmac224`    | SHA-224    | 28 bytes | --    |
+| `-hmac256`    | SHA-256    | 32 bytes | HS256 |
+| `-hmac384`    | SHA-384    | 48 bytes | HS384 |
+| `-hmac512256` | SHA-512    | 32 bytes | --    |
+| `-hmac512`    | SHA-512    | 64 bytes | HS512 |
 
 `-hmac256` is plain HMAC-SHA-256, the algorithm behind JWT `HS256` and most
 webhook signatures, where the secret is chosen by the peer. `nacl::auth verify`
 compares in constant time and returns 0 on a match. A key of exactly 32 bytes
 produces the same result as in earlier releases.
 
+RFC 4231 defines test vectors for HMAC-SHA-224, -256, -384 and -512, and all
+four are covered by the test suite.
+
 `-hmac512256` is NaCl's own `crypto_auth`: HMAC-SHA-512 with the tag truncated
-to 32 bytes. `-hmac512` is the same computation without the truncation, the
-64 byte tag that RFC 4231 and JWT `HS512` are defined on. The tag length is the
-only difference; the first 32 bytes of an `-hmac512` tag are the `-hmac512256`
-tag. `verify` requires the tag in the length of its variant, 64 bytes for
-`-hmac512` and 32 for the other two.
+to 32 bytes. `-hmac512` is the same computation without that truncation, so the
+first 32 bytes of an `-hmac512` tag are the `-hmac512256` tag. `-hmac224` and
+`-hmac384` are no such prefixes of their bigger siblings: SHA-224 and SHA-384
+start from a different initial state, which is also why a key longer than the
+block size is shortened with the hash of its own variant.
+
+`verify` requires the tag in the length of its variant and refuses any other
+with `wrong # auth length ... bytes required`.
 
 One caveat when a script has to run against older builds as well: Tcl matches
 option names by prefix, so on a version without `-hmac512` that string is an

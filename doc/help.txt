@@ -48,25 +48,36 @@
   nacl::stream cipherVariable messageValue nonceValue keyValue
 
 * crypto_auth_hmacsha256_ref, crypto_auth_hmacsha512256_ref,
-  crypto_auth_hmacsha512_ref
+  crypto_auth_hmacsha512_ref, crypto_auth_hmacsha224_ref,
+  crypto_auth_hmacsha384_ref
   nacl::auth info
     auth 32 key 32
-  nacl::auth ?-hmac256|-hmac512256|-hmac512? authVariable messageValue keyValue
-  nacl::auth verify -hmac256|-hmac512256|-hmac512 authValue messageValue keyValue
+  nacl::auth ?-hmac224|-hmac256|-hmac384|-hmac512256|-hmac512?
+    authVariable messageValue keyValue
+  nacl::auth verify -hmac224|-hmac256|-hmac384|-hmac512256|-hmac512
+    authValue messageValue keyValue
 
   keyValue may have any length. It is prepared as RFC 2104 section 2
   requires: a key longer than the block size of the hash is replaced by
   its hash, a shorter one is padded with zero bytes. The block size is
-  64 bytes for -hmac256 and 128 bytes for -hmac512256 and -hmac512. The
+  64 bytes for -hmac224 and -hmac256, 128 bytes for the other three. The
   key length of 32 bytes reported by nacl::auth info is what
   nacl::randombytes auth -key generates, not a limit. RFC 2104 sets no
   lower bound, so keeping a key of at least 32 bytes is left to the caller.
 
-  The tag is 32 bytes for -hmac256 and -hmac512256 and 64 bytes for
-  -hmac512. -hmac512256 is NaCl's crypto_auth, HMAC-SHA-512 truncated to
-  32 bytes; -hmac512 is the untruncated result that RFC 4231 and JWT
-  HS512 are defined on. verify requires the tag in the length of its
-  variant.
+  The tag is 28 bytes for -hmac224, 32 for -hmac256 and -hmac512256,
+  48 for -hmac384 and 64 for -hmac512. verify requires the tag in the
+  length of its variant.
+
+  -hmac512256 is NaCl's crypto_auth, HMAC-SHA-512 truncated to 32 bytes.
+  The other four are the untruncated HMACs that RFC 4231 defines test
+  vectors for, and -hmac256, -hmac384 and -hmac512 are what JWT calls
+  HS256, HS384 and HS512.
+
+  A key longer than the block size is shortened with the hash of its own
+  variant: SHA-224 for -hmac224 and SHA-384 for -hmac384, not with the
+  hash of equal block size. Those have a different initial state, so the
+  distinction is not cosmetic.
 
   Option names are matched by prefix. On a version of the package without
   -hmac512 that string is an unambiguous prefix of -hmac512256, so the call

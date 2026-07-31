@@ -89,8 +89,50 @@ lappend rfc4231 [list 7 [binary decode hex [string repeat aa 131]] \
   e37b6a775dc87dbaa4dfa9f96e5e3ffddebd71f8867289865df5a32d20cdc944 \
   b6022cac3c4982b10d5eeb55c3e4de15134676fb6de0446065c97440fa8c6a58]
 
+#
+# RFC 4231 defines the same seven cases for HMAC-SHA-224 and HMAC-SHA-384.
+# Keyed by test case number, the tag of each in full length. Cases 6 and 7
+# carry a 131 byte key and are the ones that exercise the key preparation:
+# it has to shorten with SHA-224 and SHA-384, not with the hash of equal
+# block size, since those have a different initial state.
+#
+
+array set rfc4231x {}
+set rfc4231x(1) {896fb1128abbdf196832107cd49df33f47b4b1169912ba4f53684b22
+  afd03944d84895626b0825f4ab46907f15f9dadbe4101ec682aa034c7cebc59cfaea9ea9076ede7f4af152e8b2fa9cb6}
+set rfc4231x(2) {a30e01098bc6dbbf45690f3a7e9e6d0f8bbea2a39e6148008fd05e44
+  af45d2e376484031617f78d2b58a6b1b9c7ef464f5a01b47e42ec3736322445e8e2240ca5e69e2c78b3239ecfab21649}
+set rfc4231x(3) {7fb3cb3588c6c1f6ffa9694d7d6ad2649365b0c1f65d69d1ec8333ea
+  88062608d3e6ad8a0aa2ace014c8a86f0aa635d947ac9febe83ef4e55966144b2a5ab39dc13814b94e3ab6e101a34f27}
+set rfc4231x(4) {6c11506874013cac6a2abc1bb382627cec6a90d86efc012de7afec5a
+  3e8a69b7783c25851933ab6290af6ca77a9981480850009cc5577c6e1f573b4e6801dd23c4a7d679ccf8a386c674cffb}
+set rfc4231x(5) {0e2aea68a90c8d37c988bcdb9fca6fa8099cd857c7ec4a1815cac54c
+  3abf34c3503b2a23a46efc619baef897f4c8e42c934ce55ccbae9740fcbc1af4ca62269e2a37cd88ba926341efe4aeea}
+set rfc4231x(6) {95e9a0db962095adaebe9b2d6f0dbce2d499f112f2d2b7273fa6870e
+  4ece084485813e9088d2c63a041bc5b44f9ef1012a2b588f3cd11f05033ac4c60c2ef6ab4030fe8296248df163f44952}
+set rfc4231x(7) {3a854166ac5d9f023f54d517d0b39dbd946770db9c2b95c9f6f565d1
+  6617178e941f020d351e2f254e8fd32c602420feb0b8fb9adccebb82461e99c5a678cc31e799176d3860e6110c46523e}
+
 foreach tc $rfc4231 {
   lassign $tc nr key msg e256 e512 e512tail
+  lassign $rfc4231x($nr) e224 e384
+
+  test auth-9.$nr "auth hmac224 rfc 4231 tc $nr, key [string length $key] bytes" {
+    nacl::auth -hmac224 auth $msg $key
+    binary encode hex $auth
+  } $e224
+
+  test auth-10.$nr "auth hmac384 rfc 4231 tc $nr, key [string length $key] bytes" {
+    nacl::auth -hmac384 auth $msg $key
+    binary encode hex $auth
+  } $e384
+
+  test auth-11.$nr "auth verify hmac224 and hmac384 rfc 4231 tc $nr" {
+    nacl::auth -hmac224 auth  $msg $key
+    nacl::auth -hmac384 auth2 $msg $key
+    list [nacl::auth verify -hmac224 $auth  $msg $key] \
+	 [nacl::auth verify -hmac384 $auth2 $msg $key]
+  } {0 0}
 
   test auth-2.$nr "auth hmac256 rfc 4231 tc $nr, key [string length $key] bytes" {
     nacl::auth -hmac256 auth $msg $key
@@ -191,6 +233,56 @@ test auth-8.7 {hmac512 key of block size, no truncation involved} {
   nacl::auth -hmac512 auth {Hi There} [string repeat A 64]
   string length [binary encode hex $auth]
 } 128
+
+#
+# -hmac224 and -hmac384 complete the four algorithms RFC 4231 defines, and
+# with -hmac384 the HS384 of RFC 7518 becomes reachable.
+#
+
+test auth-12.1 {tag lengths of all five variants} {
+    set r {}
+    foreach opt {-hmac224 -hmac256 -hmac384 -hmac512256 -hmac512} {
+	nacl::auth $opt auth {Hi There} Jefe
+	lappend r [string length $auth]
+    }
+    set r
+} {28 32 48 32 64}
+
+test auth-12.2 {verify hmac224 insists on 28 bytes} {
+    nacl::auth -hmac256 auth {Hi There} Jefe
+    list [catch {nacl::auth verify -hmac224 $auth {Hi There} Jefe} e] $e
+} {1 {wrong # auth length 28 bytes required}}
+
+test auth-12.3 {verify hmac384 insists on 48 bytes} {
+    nacl::auth -hmac512 auth {Hi There} Jefe
+    list [catch {nacl::auth verify -hmac384 $auth {Hi There} Jefe} e] $e
+} {1 {wrong # auth length 48 bytes required}}
+
+test auth-12.4 {hmac224 is not a prefix of hmac256} {
+    nacl::auth -hmac224 auth  {Hi There} Jefe
+    nacl::auth -hmac256 auth2 {Hi There} Jefe
+    string equal $auth [string range $auth2 0 27]
+} 0
+
+test auth-12.5 {hmac384 is not a prefix of hmac512} {
+    nacl::auth -hmac384 auth  {Hi There} Jefe
+    nacl::auth -hmac512 auth2 {Hi There} Jefe
+    string equal $auth [string range $auth2 0 47]
+} 0
+
+test auth-12.6 {verify hmac224 rejects a flipped last byte} {
+    nacl::auth -hmac224 auth {Hi There} Jefe
+    binary scan $auth cu* b
+    lset b end [expr {[lindex $b end] ^ 0xff}]
+    nacl::auth verify -hmac224 [binary format cu* $b] {Hi There} Jefe
+} -1
+
+test auth-12.7 {verify hmac384 rejects a flipped last byte} {
+    nacl::auth -hmac384 auth {Hi There} Jefe
+    binary scan $auth cu* b
+    lset b end [expr {[lindex $b end] ^ 0xff}]
+    nacl::auth verify -hmac384 [binary format cu* $b] {Hi There} Jefe
+} -1
 
 # cleanup
 ::tcltest::cleanupTests

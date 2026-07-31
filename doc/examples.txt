@@ -74,6 +74,15 @@ if {[nacl::auth -hmac512256 auth $message $key] == 0} {
 # HS512 are defined on. Take -hmac512256 where both ends are yours and the
 # NaCl primitive is what is meant, and -hmac512 wherever the tag has to
 # match another implementation.
+#
+# Five variants exist in total, the four untruncated HMACs that RFC 4231
+# defines test vectors for plus the truncated NaCl one:
+#
+#   -hmac224      SHA-224   28 bytes
+#   -hmac256      SHA-256   32 bytes   JWT HS256
+#   -hmac384      SHA-384   48 bytes   JWT HS384
+#   -hmac512256   SHA-512   32 bytes   NaCl crypto_auth
+#   -hmac512      SHA-512   64 bytes   JWT HS512
 
 package require nacl
 
