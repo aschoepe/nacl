@@ -36,7 +36,7 @@ test stream-1.1 {stream takes args} -body {
 
 test stream-1.2 {stream info} {
   list [catch {nacl::stream info} l] $l
-} {0 {cipher+ 0 nonce 24 public-key 32}}
+} {0 {cipher+ 0 nonce 24 key 32}}
 
 test stream-1.3 {stream generate 4194304} {
   list [nacl::stream generate stream 4194304 $n1 $k1] [nacl::hash -sha256 hash $stream] $hash

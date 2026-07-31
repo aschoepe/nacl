@@ -1805,7 +1805,7 @@ static int Tnacl_Stream (ClientData clientData, Tcl_Interp *interp, int objc, Tc
       Tcl_ListObjAppendElement(interp, lObjPtr, Tcl_NewIntObj(0));
       Tcl_ListObjAppendElement(interp, lObjPtr, Tcl_NewStringObj("nonce", -1));
       Tcl_ListObjAppendElement(interp, lObjPtr, Tcl_NewIntObj(crypto_stream_NONCEBYTES));
-      Tcl_ListObjAppendElement(interp, lObjPtr, Tcl_NewStringObj("public-key", -1));
+      Tcl_ListObjAppendElement(interp, lObjPtr, Tcl_NewStringObj("key", -1));
       Tcl_ListObjAppendElement(interp, lObjPtr, Tcl_NewIntObj(crypto_stream_KEYBYTES));
       Tcl_SetObjResult(interp, lObjPtr);
       return TCL_OK;
@@ -2065,7 +2065,7 @@ static int Tnacl_Auth(ClientData clientData, Tcl_Interp *interp, int objc, Tcl_O
       Tcl_Obj *lObjPtr = Tcl_NewListObj(0, NULL);
       Tcl_ListObjAppendElement(interp, lObjPtr, Tcl_NewStringObj("auth", -1));
       Tcl_ListObjAppendElement(interp, lObjPtr, Tcl_NewIntObj(crypto_auth_BYTES));
-      Tcl_ListObjAppendElement(interp, lObjPtr, Tcl_NewStringObj("nonce", -1));
+      Tcl_ListObjAppendElement(interp, lObjPtr, Tcl_NewStringObj("key", -1));
       Tcl_ListObjAppendElement(interp, lObjPtr, Tcl_NewIntObj(crypto_auth_KEYBYTES));
       Tcl_SetObjResult(interp, lObjPtr);
       return TCL_OK;
